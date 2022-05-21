@@ -1,5 +1,12 @@
 package com.maiaaldeco.portfolio.repository;
 
-public interface ExperienciaRepository {
-    
+import com.maiaaldeco.portfolio.entity.Experiencia;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface ExperienciaRepository extends JpaRepository<Experiencia, Long>{
+    Optional<Experiencia>findByNombre(String nombre);
+    boolean existsByNombre(String nombre);
 }

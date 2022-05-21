@@ -1,10 +1,16 @@
 package com.maiaaldeco.portfolio.entity;
 
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -13,33 +19,41 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter @Setter
-@Table(name="PERSONS")
+@Table(name="person")
 public class Persona {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="ID_PERSON")
+    @Column(name="id_person")
     private long id;
+    
     @NotNull
-    @Column(name="FIRSTNAME")
+    @Column(name="firstname")
     private String nombre;
     @NotNull
-    @Column(name="LASTNAME")
+    @Column(name="lastname")
     private String apellido;
     @NotNull
-    @Column(name="STACK")
+    @Column(name="stack")
     private String stack;
     @NotNull
-    @Column(name="TECHNO")
+    @Column(name="tech")
     private String tecnologia;
     @NotNull
-    @Column(name="DESC")
+    @Column(name="description")
     private String descripcion;
-    @Column(name="CONTACT")
+    @JoinColumn(name = "id_contacto")
+    @OneToOne(fetch = FetchType.LAZY)
     private Contacto contacto;
+//    @OneToMany(mappedBy = "persona", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Experiencia> exp;
+//    @OneToMany(mappedBy = "persona", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Estudio> estudio;
+//    @OneToMany(mappedBy = "persona", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Trabajo> trabajo;
 
     public Persona(String nombre, String apellido, String stack, String tecnologia, String descripcion) {
         this.nombre = nombre;

@@ -1,6 +1,12 @@
 package com.maiaaldeco.portfolio.repository;
 
+import com.maiaaldeco.portfolio.entity.Trabajo;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface TrabajoRepository {
-    
+@Repository
+public interface TrabajoRepository extends JpaRepository<Trabajo, Long>{
+    Optional<Trabajo>findByTitulo(String titulo);
+    boolean existsByTitulo(String titulo);
 }

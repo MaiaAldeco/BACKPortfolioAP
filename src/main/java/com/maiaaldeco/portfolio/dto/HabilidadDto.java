@@ -8,18 +8,15 @@ import lombok.Setter;
 
 @AllArgsConstructor
 @Getter @Setter
-public class TrabajoDto {
-    
+public class HabilidadDto {
     @NotBlank
-    private String titulo;
+    private String habilidadNombre;
     @NotBlank
-    private String descripcion;
+    private int porcentaje;
     private Persona persona;
 
-    public TrabajoDto(String titulo, String descripcion) {
-        this.titulo = titulo;
-        this.descripcion = descripcion;
-    }
-    
-    
+    public HabilidadDto(String habilidadNombre, int porcentaje) {
+        this.habilidadNombre = habilidadNombre;
+        this.porcentaje = porcentaje;
+    } 
 }
