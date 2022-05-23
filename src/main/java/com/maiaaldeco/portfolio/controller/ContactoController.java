@@ -5,10 +5,13 @@ import com.maiaaldeco.portfolio.dto.Mensaje;
 import com.maiaaldeco.portfolio.entity.Contacto;
 import com.maiaaldeco.portfolio.service.IContactoService;
 import java.util.List;
+import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,39 +47,54 @@ public class ContactoController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> create(@RequestBody ContactoDto contactoDto) {
-        if (StringUtils.isBlank(contactoDto.getLocalidad())) {
-            return new ResponseEntity(new Mensaje("el nombre es obligatorio"), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<?> create(@Valid @RequestBody ContactoDto contactoDto, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+           List<FieldError> errors = bindingResult.getFieldErrors();
+            for (FieldError error : errors ) {
+                return new ResponseEntity(new Mensaje(error.getDefaultMessage()), HttpStatus.BAD_REQUEST);
+                }
         }
-        if (StringUtils.isBlank(contactoDto.getTelefono())) {
-            return new ResponseEntity(new Mensaje("el telefono es obligatorio"), HttpStatus.BAD_REQUEST);
-        }
-        if (StringUtils.isBlank(contactoDto.getEmail())) {
-            return new ResponseEntity(new Mensaje("el telefono es obligatorio"), HttpStatus.BAD_REQUEST);
-        }
-        Contacto contacto = new Contacto(contactoDto.getLocalidad(), contactoDto.getTelefono(), contactoDto.getEmail());
+//        if (contactoService.existsByEmail(contactoDto.getEmail())) {
+//            return new ResponseEntity(new Mensaje("ese email ya existe"), HttpStatus.BAD_REQUEST);
+//        }
+//        if (StringUtils.isBlank(contactoDto.getLocalidad())) {
+//            return new ResponseEntity(new Mensaje("La localidad es obligatoria"), HttpStatus.BAD_REQUEST);
+//        }
+//        if (contactoDto.getTelefono() == null || contactoDto.getTelefono().length() < 10) {
+//            return new ResponseEntity(new Mensaje("Ingresa un número de teléfono válido"), HttpStatus.BAD_REQUEST);
+//        }
+//        if (StringUtils.isBlank(contactoDto.getEmail())) {
+//            return new ResponseEntity(new Mensaje("El email no es válido"), HttpStatus.BAD_REQUEST);
+//        }
+        Contacto contacto = new Contacto(contactoDto.getLocalidad(), String.valueOf(contactoDto.getTelefono()), contactoDto.getEmail());
         contactoService.save(contacto);
         return new ResponseEntity(new Mensaje("Contacto creado con éxito"), HttpStatus.OK);
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> update(@PathVariable("id") long id, @RequestBody ContactoDto contactoDto) {
+    public ResponseEntity<?> update(@PathVariable("id") long id, @Valid @RequestBody ContactoDto contactoDto, BindingResult bindingResult) {
         if (!contactoService.existsById(id)) {
             return new ResponseEntity(new Mensaje("El contacto no existe"), HttpStatus.NOT_FOUND);
         }
-        if (StringUtils.isBlank(contactoDto.getLocalidad())) {
-            return new ResponseEntity(new Mensaje("el nombre es obligatorio"), HttpStatus.BAD_REQUEST);
+        if (bindingResult.hasErrors()) {
+            List<FieldError> errors = bindingResult.getFieldErrors();
+            for (FieldError error : errors ) {
+                return new ResponseEntity(new Mensaje(error.getDefaultMessage()), HttpStatus.BAD_REQUEST);
+                }
         }
-        if (StringUtils.isBlank(contactoDto.getTelefono())) {
-            return new ResponseEntity(new Mensaje("el telefono es obligatorio"), HttpStatus.BAD_REQUEST);
-        }
-        if (StringUtils.isBlank(contactoDto.getEmail())) {
-            return new ResponseEntity(new Mensaje("el telefono es obligatorio"), HttpStatus.BAD_REQUEST);
-        }
+//        if (StringUtils.isBlank(contactoDto.getLocalidad())) {
+//            return new ResponseEntity(new Mensaje("La localidad es obligatorio"), HttpStatus.BAD_REQUEST);
+//        }
+//        if (contactoDto.getTelefono() == null || contactoDto.getTelefono().length() < 10) {
+//            return new ResponseEntity(new Mensaje("Ingresa un número de teléfono válido"), HttpStatus.BAD_REQUEST);
+//        }
+//        if (StringUtils.isBlank(contactoDto.getEmail())) {
+//            return new ResponseEntity(new Mensaje("El email no es válido"), HttpStatus.BAD_REQUEST);
+//        }
 
         Contacto contacto = contactoService.getOne(id).get();
         contacto.setLocalidad(contactoDto.getLocalidad());
-        contacto.setTelefono(contactoDto.getTelefono());
+        contacto.setTelefono(String.valueOf(contactoDto.getTelefono()));
         contacto.setEmail(contactoDto.getEmail());
         contactoService.save(contacto);
         return new ResponseEntity(new Mensaje("Contacto actualizado con éxito"), HttpStatus.OK);

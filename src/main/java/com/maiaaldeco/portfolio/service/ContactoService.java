@@ -39,4 +39,9 @@ public class ContactoService implements IContactoService{
     public boolean existsById(long id) {
         return contactoRepository.existsById(id);
     }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        return contactoRepository.existsByEmail(email);
+    }
 }

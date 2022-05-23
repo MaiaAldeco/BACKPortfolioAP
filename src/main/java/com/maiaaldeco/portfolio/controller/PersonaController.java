@@ -2,7 +2,9 @@ package com.maiaaldeco.portfolio.controller;
 
 import com.maiaaldeco.portfolio.dto.Mensaje;
 import com.maiaaldeco.portfolio.dto.PersonaDto;
+import com.maiaaldeco.portfolio.entity.Contacto;
 import com.maiaaldeco.portfolio.entity.Persona;
+import com.maiaaldeco.portfolio.service.IContactoService;
 import com.maiaaldeco.portfolio.service.IPersonaService;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -26,6 +28,9 @@ public class PersonaController {
 
     @Autowired
     IPersonaService personaService;
+    
+    @Autowired
+    IContactoService contactoService;
 
     @GetMapping("/lista")
     public ResponseEntity<List<Persona>> list() {
@@ -42,15 +47,14 @@ public class PersonaController {
             return new ResponseEntity<Persona>(persona, HttpStatus.OK);
         }
     }
-
-    @GetMapping("/detailname/{nombre}")
-    public ResponseEntity<Persona> getByNombre(@PathVariable("nombre") String nombre) {
-        if (!personaService.existsByNombre(nombre)) {
+    
+    @GetMapping("/contacto/{contactoId}")
+    public ResponseEntity<List<Persona>> getAllPersonasByEstudioId(@PathVariable (value = "contactoId") long contactoId){
+        if(!contactoService.existsById(contactoId)){
             return new ResponseEntity(new Mensaje("no existe"), HttpStatus.NOT_FOUND);
-        } else {
-            Persona persona = personaService.getByNombre(nombre).get();
-            return new ResponseEntity<Persona>(persona, HttpStatus.OK);
         }
+        List<Persona> contactos = personaService.findByContactoId(contactoId);
+        return new ResponseEntity<>(contactos,HttpStatus.OK);
     }
 
     @PostMapping("/create")
@@ -67,18 +71,39 @@ public class PersonaController {
         if (StringUtils.isBlank(persoDto.getTecnologia())) {
             return new ResponseEntity(new Mensaje("la tecnologia es obligatorio"), HttpStatus.BAD_REQUEST);
         }
-        if (StringUtils.isBlank(persoDto.getTecnologia())) {
-            return new ResponseEntity(new Mensaje("la tecnologia es obligatorio"), HttpStatus.BAD_REQUEST);
-        }
-        if (StringUtils.isBlank(persoDto.getDescripcion().toString())) {
+        if (StringUtils.isBlank(persoDto.getDescripcion())) {
             return new ResponseEntity(new Mensaje("la descripcion es obligatoria"), HttpStatus.BAD_REQUEST);
-        }
-        if (StringUtils.isBlank(persoDto.getContacto().toString())) {
-            return new ResponseEntity(new Mensaje("debes especificar el contacto"), HttpStatus.BAD_REQUEST);
         }
         Persona persona = new Persona(persoDto.getNombre(), persoDto.getApellido(), persoDto.getStack(), persoDto.getTecnologia(), persoDto.getDescripcion(), persoDto.getContacto());
         personaService.save(persona);
         return new ResponseEntity(new Mensaje("persona creado con éxito"), HttpStatus.OK);
+    }
+    
+    @PostMapping("/create/{contactoId}")
+    public ResponseEntity<?> create(@PathVariable (value = "contactoId") long contactoId, @RequestBody PersonaDto persoDto) {
+        if(!contactoService.existsById(contactoId)){
+            return new ResponseEntity(new Mensaje("no existe ese contacto"), HttpStatus.NOT_FOUND);
+        }
+        if (StringUtils.isBlank(persoDto.getNombre())) { //common lang
+            return new ResponseEntity(new Mensaje("el nombre es obligatorio"), HttpStatus.BAD_REQUEST);
+        }
+        if (StringUtils.isBlank(persoDto.getApellido())) { //common lang
+            return new ResponseEntity(new Mensaje("el apellido es obligatorio"), HttpStatus.BAD_REQUEST);
+        }
+        if (StringUtils.isBlank(persoDto.getStack())) {
+            return new ResponseEntity(new Mensaje("el stack es obligatorio"), HttpStatus.BAD_REQUEST);
+        }
+        if (StringUtils.isBlank(persoDto.getTecnologia())) {
+            return new ResponseEntity(new Mensaje("la tecnologia es obligatorio"), HttpStatus.BAD_REQUEST);
+        }
+        if (StringUtils.isBlank(persoDto.getDescripcion())) {
+            return new ResponseEntity(new Mensaje("la descripcion es obligatoria"), HttpStatus.BAD_REQUEST);
+        }
+;
+        Contacto contacto = contactoService.getOne(contactoId).get();
+        Persona persona = new Persona(persoDto.getNombre(),persoDto.getApellido(),persoDto.getStack(),persoDto.getStack(),persoDto.getTecnologia(), contacto);
+        personaService.save(persona);
+        return new ResponseEntity(new Mensaje("persona creado con éxito"), HttpStatus.CREATED);
     }
 
     @PutMapping("/update/{id}")
@@ -98,14 +123,8 @@ public class PersonaController {
         if (StringUtils.isBlank(persoDto.getTecnologia())) {
             return new ResponseEntity(new Mensaje("la tecnologia es obligatorio"), HttpStatus.BAD_REQUEST);
         }
-        if (StringUtils.isBlank(persoDto.getTecnologia())) {
-            return new ResponseEntity(new Mensaje("la tecnologia es obligatorio"), HttpStatus.BAD_REQUEST);
-        }
-        if (StringUtils.isBlank(persoDto.getDescripcion().toString())) {
+        if (StringUtils.isBlank(persoDto.getDescripcion())) {
             return new ResponseEntity(new Mensaje("la descripcion es obligatoria"), HttpStatus.BAD_REQUEST);
-        }
-        if (StringUtils.isBlank(persoDto.getContacto().toString())) {
-            return new ResponseEntity(new Mensaje("debes especificar el contacto"), HttpStatus.BAD_REQUEST);
         }
 
         Persona persona = personaService.getOne(id).get();

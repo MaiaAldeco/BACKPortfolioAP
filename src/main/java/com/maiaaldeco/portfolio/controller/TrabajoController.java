@@ -2,7 +2,9 @@ package com.maiaaldeco.portfolio.controller;
 
 import com.maiaaldeco.portfolio.dto.Mensaje;
 import com.maiaaldeco.portfolio.dto.TrabajoDto;
+import com.maiaaldeco.portfolio.entity.Persona;
 import com.maiaaldeco.portfolio.entity.Trabajo;
+import com.maiaaldeco.portfolio.service.IPersonaService;
 import com.maiaaldeco.portfolio.service.ITrabajoService;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -26,6 +28,9 @@ public class TrabajoController {
 
     @Autowired
     ITrabajoService trabajoService;
+    
+    @Autowired
+    IPersonaService personaService;
 
     @GetMapping("/lista")
     public ResponseEntity<List<Trabajo>> list() {
@@ -52,6 +57,15 @@ public class TrabajoController {
             return new ResponseEntity<Trabajo>(trabajo, HttpStatus.OK);
         }
     }
+    
+    @GetMapping("/persona/{persona_id}/exp")
+    public ResponseEntity<List<Trabajo>> getAllPersonasByEstudioId(@PathVariable (value = "persona_id") long persona_id){
+        if(!personaService.existsById(persona_id)){
+            return new ResponseEntity(new Mensaje("no existe"), HttpStatus.NOT_FOUND);
+        }
+        List<Trabajo> exp = trabajoService.findByPersonaId(persona_id);
+        return new ResponseEntity<>(exp,HttpStatus.OK);
+    }
 
     @PostMapping("/create")
     public ResponseEntity<?> create(@RequestBody TrabajoDto trabajoDto) {
@@ -66,7 +80,24 @@ public class TrabajoController {
         trabajoService.save(trabajo);
         return new ResponseEntity(new Mensaje("trabajo creado con éxito"), HttpStatus.OK);
     }
-
+    
+    @PostMapping("/create/{personaId}")
+    public ResponseEntity<?> create(@PathVariable(value = "personaId") long personaId, @RequestBody TrabajoDto trabajoDto) {
+         if (StringUtils.isBlank(trabajoDto.getTitulo())) { //common lang
+            return new ResponseEntity(new Mensaje("el titulo es obligatorio"), HttpStatus.BAD_REQUEST);
+        }
+        if (StringUtils.isBlank(trabajoDto.getDescripcion())) { //common lang
+            return new ResponseEntity(new Mensaje("la descripcion es obligatorio"), HttpStatus.BAD_REQUEST);
+        }
+        if(!personaService.existsById(personaId)){
+            return new ResponseEntity(new Mensaje("no existe esa persona"), HttpStatus.NOT_FOUND);
+        }
+        Persona persona =  Persona.class.cast(personaService.getOne(personaId));
+        Trabajo trabajo = new Trabajo(trabajoDto.getTitulo(),trabajoDto.getDescripcion(),persona);
+        trabajoService.save(trabajo);
+        return new ResponseEntity(new Mensaje("experiencia creado con éxito"), HttpStatus.CREATED);
+    }
+    
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable("id") long id, @RequestBody TrabajoDto trabajoDto) {
         if (!trabajoService.existsById(id)) {
@@ -95,5 +126,14 @@ public class TrabajoController {
         }
         trabajoService.delete(id);
         return new ResponseEntity(new Mensaje("eliminado con éxito"), HttpStatus.OK);
+    }
+    
+    @DeleteMapping("/delete/{personaId}/estudio")
+    public ResponseEntity<List<Trabajo>>deleteAllEstudiosDePersonas(@PathVariable(value = "personaId") long personaId){
+        if(!personaService.existsById(personaId)){
+            return new ResponseEntity(new Mensaje("id no encontrado"), HttpStatus.NOT_FOUND);
+        }
+        trabajoService.deleteByPersonaId(personaId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

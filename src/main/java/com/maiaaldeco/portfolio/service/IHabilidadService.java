@@ -13,4 +13,6 @@ public interface IHabilidadService {
     public void delete(long id);
     public boolean existsById(long id);
     public boolean existsByHabilidad(String habilidad);
+    List<Habilidad>findByPersonaId(long id);
+    void deleteByPersonaId(long personaId);
 }

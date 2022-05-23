@@ -49,4 +49,14 @@ public class EstudioService implements IEstudioService{
     public boolean existsByCurso(String curso) {
         return estudioRepository.existsByCurso(curso);
     }
+
+    @Override
+    public List<Estudio> findByPersonaId(long id) {
+        return estudioRepository.findByPersonaId(id);
+    }
+
+    @Override
+    public void deleteByPersonaId(long personaId) {
+        
+    }
 }

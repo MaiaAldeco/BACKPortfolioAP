@@ -10,6 +10,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -40,6 +42,7 @@ public class Estudio {
     @ManyToOne(fetch= FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_persona", nullable=false)
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @NotNull
     private Persona persona;
 
     public Estudio(String lugar, String curso, Date fechaInicio, Date fechaFin) {

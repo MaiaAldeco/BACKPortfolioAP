@@ -34,8 +34,8 @@ public class Contacto {
     @NotNull
     @Column(name = "email")
     private String email;
-//    @OneToOne(mappedBy = "contacto", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-//    private Persona persona;
+    @OneToOne(mappedBy = "contacto", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Persona persona;
 
     public Contacto(String localidad, String telefono, String email) {
         this.localidad = localidad;

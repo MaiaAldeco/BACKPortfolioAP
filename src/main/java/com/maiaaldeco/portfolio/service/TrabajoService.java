@@ -49,4 +49,14 @@ public class TrabajoService implements ITrabajoService{
     public boolean existsByTitulo(String titulo) {
         return trabajoRepository.existsByTitulo(titulo);
     }
+
+    @Override
+    public List<Trabajo> findByPersonaId(long id) {
+        return trabajoRepository.findByPersonaId(id);
+    }
+
+    @Override
+    public void deleteByPersonaId(long personaId) {
+        trabajoRepository.deleteByPersonaId(personaId);
+    }
 }

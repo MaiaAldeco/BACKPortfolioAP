@@ -49,4 +49,14 @@ public class PersonaService implements IPersonaService{
     public boolean existsByNombre(String nombre) {
         return personaRepository.existsByNombre(nombre);
     }
+
+    @Override
+    public List<Persona> findByContactoId(long id) {
+        return personaRepository.findByContactoId(id);
+    }
+
+    @Override
+    public void deleteByContactoId(long personaId) {
+        personaRepository.deleteByContactoId(personaId);
+    }
 }

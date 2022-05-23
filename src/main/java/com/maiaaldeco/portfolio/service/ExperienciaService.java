@@ -49,4 +49,14 @@ public class ExperienciaService implements IExperienciaService{
     public boolean existsByNombre(String nombre) {
         return experienciaRepository.existsByNombre(nombre);
     }
+
+    @Override
+    public List<Experiencia> findByPersonaId(long id) {
+        return experienciaRepository.findByPersonaId(id);
+    }
+
+    @Override
+    public void deleteByPersonaId(long personaId) {
+        experienciaRepository.deleteByPersonaId(personaId);
+    }
 }

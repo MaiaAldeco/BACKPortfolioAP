@@ -49,4 +49,14 @@ public class HabilidadService implements IHabilidadService{
     public boolean existsByHabilidad(String habilidad) {
         return habilidadRepository.existsByHabilidad(habilidad);
     }
+
+    @Override
+    public List<Habilidad> findByPersonaId(long id) {
+        return habilidadRepository.findByPersonaId(id);
+    }
+
+    @Override
+    public void deleteByPersonaId(long personaId) {
+        habilidadRepository.deleteByPersonaId(personaId);
+    }
 }

@@ -1,39 +1,23 @@
 package com.maiaaldeco.portfolio.dto;
 
 import com.maiaaldeco.portfolio.entity.Persona;
-import java.sql.Date;
 import javax.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Past;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter @Setter
 public class EstudioDto {
-    @NotBlank
+    @NotBlank(message = "El lugar del curso/carrera es obligatorio")
     private String lugar;
-    @NotBlank
+    @NotBlank(message = "El nombre del curso/carrera es obligatorio")
     private String curso;
-    @NotBlank
+    @Past(message="Fecha de inicio incorrecta")
+    @NotNull(message = "La fecha de inicio es obligatoria")
     private java.sql.Date fechaInicio;
+    @Past(message="Fecha de fin incorrecta")
     private java.sql.Date fechaFin;
+    @NotNull(message = "Debes asignar una persona a este estudio")
     private Persona persona;
-
-    public EstudioDto(String lugar, String curso, Date fechaInicio, Date fechaFin) {
-        this.lugar = lugar;
-        this.curso = curso;
-        this.fechaInicio = fechaInicio;
-        this.fechaFin = fechaFin;
-    }
-
-    public EstudioDto(String lugar, String curso, Date fechaInicio, Persona persona) {
-        this.lugar = lugar;
-        this.curso = curso;
-        this.fechaInicio = fechaInicio;
-        this.persona = persona;
-    }
-    
-    
 }

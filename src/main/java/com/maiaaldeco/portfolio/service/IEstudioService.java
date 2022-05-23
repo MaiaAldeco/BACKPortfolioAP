@@ -13,4 +13,6 @@ public interface IEstudioService {
     public void delete(long id);
     public boolean existsById(long id);
     public boolean existsByCurso(String curso);
+    List<Estudio>findByPersonaId(long id);
+    void deleteByPersonaId(long personaId);
 }

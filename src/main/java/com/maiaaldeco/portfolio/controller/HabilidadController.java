@@ -3,7 +3,9 @@ package com.maiaaldeco.portfolio.controller;
 import com.maiaaldeco.portfolio.dto.HabilidadDto;
 import com.maiaaldeco.portfolio.dto.Mensaje;
 import com.maiaaldeco.portfolio.entity.Habilidad;
+import com.maiaaldeco.portfolio.entity.Persona;
 import com.maiaaldeco.portfolio.service.IHabilidadService;
+import com.maiaaldeco.portfolio.service.IPersonaService;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,9 @@ public class HabilidadController {
 
     @Autowired
     IHabilidadService habilidadService;
+    
+    @Autowired
+    IPersonaService personaService;
 
     @GetMapping("/lista")
     public ResponseEntity<List<Habilidad>> list() {
@@ -52,6 +57,15 @@ public class HabilidadController {
             return new ResponseEntity<Habilidad>(habi, HttpStatus.OK);
         }
     }
+    
+    @GetMapping("/persona/{persona_id}/skill")
+    public ResponseEntity<List<Habilidad>> getAllPersonasByEstudioId(@PathVariable (value = "persona_id") long persona_id){
+        if(!personaService.existsById(persona_id)){
+            return new ResponseEntity(new Mensaje("no existe"), HttpStatus.NOT_FOUND);
+        }
+        List<Habilidad> skill = habilidadService.findByPersonaId(persona_id);
+        return new ResponseEntity<>(skill,HttpStatus.OK);
+    }
 
     @PostMapping("/create")
     public ResponseEntity<?> create(@RequestBody HabilidadDto habiDto) {
@@ -60,9 +74,6 @@ public class HabilidadController {
         }
         if (StringUtils.isBlank(String.valueOf(habiDto.getPorcentaje()))) { //common lang
             return new ResponseEntity(new Mensaje("el porcentaje es obligatorio"), HttpStatus.BAD_REQUEST);
-        }
-        if (StringUtils.isBlank(habiDto.getPersona().toString())) {
-            return new ResponseEntity(new Mensaje("debes especificar de quien es esta habilidad"), HttpStatus.BAD_REQUEST);
         }
         Habilidad habilidad = new Habilidad(habiDto.getHabilidadNombre(), habiDto.getPorcentaje(), habiDto.getPersona());
         habilidadService.save(habilidad);
@@ -80,9 +91,6 @@ public class HabilidadController {
         if (StringUtils.isBlank(String.valueOf(habiDto.getPorcentaje()))) { //common lang
             return new ResponseEntity(new Mensaje("el porcentaje es obligatorio"), HttpStatus.BAD_REQUEST);
         }
-        if (StringUtils.isBlank(habiDto.getPersona().toString())) {
-            return new ResponseEntity(new Mensaje("debes especificar de quien es esta habilidad"), HttpStatus.BAD_REQUEST);
-        }
 
         Habilidad habi = habilidadService.getOne(id).get();
         habi.setHabilidad(habiDto.getHabilidadNombre());
@@ -92,6 +100,24 @@ public class HabilidadController {
         habilidadService.save(habi);
         return new ResponseEntity(new Mensaje("habilidad actualizado con éxito"), HttpStatus.OK);
     }
+    
+    @PostMapping("/create/{personaId}")
+    public ResponseEntity<?> create(@PathVariable(value = "personaId") long personaId, @RequestBody HabilidadDto habiDto) {
+        if (StringUtils.isBlank(habiDto.getHabilidadNombre())) { 
+            return new ResponseEntity(new Mensaje("el nombre es obligatorio"), HttpStatus.BAD_REQUEST);
+        }
+        if (StringUtils.isBlank(String.valueOf(habiDto.getPorcentaje()))) { //common lang
+            return new ResponseEntity(new Mensaje("el porcentaje es obligatorio"), HttpStatus.BAD_REQUEST);
+        }
+
+        if(!personaService.existsById(personaId)){
+            return new ResponseEntity(new Mensaje("no existe esa persona"), HttpStatus.NOT_FOUND);
+        }
+        Persona persona =  Persona.class.cast(personaService.getOne(personaId));
+        Habilidad skill = new Habilidad(habiDto.getHabilidadNombre(), habiDto.getPorcentaje(), persona);
+        habilidadService.save(skill);
+        return new ResponseEntity(new Mensaje("experiencia creado con éxito"), HttpStatus.CREATED);
+    }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") long id) {
@@ -100,5 +126,14 @@ public class HabilidadController {
         }
         habilidadService.delete(id);
         return new ResponseEntity(new Mensaje("eliminado con éxito"), HttpStatus.OK);
+    }
+    
+    @DeleteMapping("/delete/{personaId}/estudio")
+    public ResponseEntity<List<Habilidad>>deleteAllEstudiosDePersonas(@PathVariable(value = "personaId") long personaId){
+        if(!personaService.existsById(personaId)){
+            return new ResponseEntity(new Mensaje("id no encontrado"), HttpStatus.NOT_FOUND);
+        }
+        habilidadService.deleteByPersonaId(personaId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

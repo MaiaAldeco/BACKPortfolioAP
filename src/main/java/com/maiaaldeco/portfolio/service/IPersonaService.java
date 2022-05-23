@@ -13,4 +13,6 @@ public interface IPersonaService {
     public void delete(long id);
     public boolean existsById(long id);
     public boolean existsByNombre(String nombre);
+    List<Persona>findByContactoId(long id);
+    void deleteByContactoId(long personaId);
 }

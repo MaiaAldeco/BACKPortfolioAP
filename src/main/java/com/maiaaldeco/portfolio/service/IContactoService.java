@@ -12,4 +12,5 @@ public interface IContactoService {
     public void save(Contacto contacto);
     public void delete(long id);
     public boolean existsById(long id);
+    boolean existsByEmail(String email);
 }
