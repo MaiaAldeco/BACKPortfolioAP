@@ -6,7 +6,6 @@ import com.maiaaldeco.portfolio.entity.Contacto;
 import com.maiaaldeco.portfolio.service.IContactoService;
 import java.util.List;
 import javax.validation.Valid;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,8 +40,8 @@ public class ContactoController {
         if (!contactoService.existsById(id)) {
             return new ResponseEntity(new Mensaje("no existe"), HttpStatus.NOT_FOUND);
         } else {
-            Contacto producto = contactoService.getOne(id).get();
-            return new ResponseEntity<Contacto>(producto, HttpStatus.OK);
+            Contacto contacto = contactoService.getOne(id).get();
+            return new ResponseEntity<Contacto>(contacto, HttpStatus.OK);
         }
     }
 
@@ -66,7 +65,7 @@ public class ContactoController {
 //        if (StringUtils.isBlank(contactoDto.getEmail())) {
 //            return new ResponseEntity(new Mensaje("El email no es válido"), HttpStatus.BAD_REQUEST);
 //        }
-        Contacto contacto = new Contacto(contactoDto.getLocalidad(), String.valueOf(contactoDto.getTelefono()), contactoDto.getEmail());
+        Contacto contacto = new Contacto(contactoDto.getLocalidad(), contactoDto.getTelefono(), contactoDto.getEmail());
         contactoService.save(contacto);
         return new ResponseEntity(new Mensaje("Contacto creado con éxito"), HttpStatus.OK);
     }
@@ -94,7 +93,7 @@ public class ContactoController {
 
         Contacto contacto = contactoService.getOne(id).get();
         contacto.setLocalidad(contactoDto.getLocalidad());
-        contacto.setTelefono(String.valueOf(contactoDto.getTelefono()));
+        contacto.setTelefono(contactoDto.getTelefono());
         contacto.setEmail(contactoDto.getEmail());
         contactoService.save(contacto);
         return new ResponseEntity(new Mensaje("Contacto actualizado con éxito"), HttpStatus.OK);

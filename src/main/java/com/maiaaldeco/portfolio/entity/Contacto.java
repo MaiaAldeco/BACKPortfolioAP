@@ -13,6 +13,8 @@ import javax.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 @Entity
 @NoArgsConstructor
@@ -34,7 +36,8 @@ public class Contacto {
     @NotNull
     @Column(name = "email")
     private String email;
-    @OneToOne(mappedBy = "contacto", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToOne(mappedBy = "contacto", orphanRemoval = true, fetch = FetchType.EAGER)
+    @NotFound(action=NotFoundAction.IGNORE)
     private Persona persona;
 
     public Contacto(String localidad, String telefono, String email) {
@@ -42,5 +45,13 @@ public class Contacto {
         this.telefono = telefono;
         this.email = email;
     }
+
+    public Contacto(String localidad, String telefono, String email, Persona persona) {
+        this.localidad = localidad;
+        this.telefono = telefono;
+        this.email = email;
+        this.persona = persona;
+    }
+    
 
 }

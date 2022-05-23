@@ -1,5 +1,6 @@
 package com.maiaaldeco.portfolio.entity;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -14,6 +15,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 @Entity
 @NoArgsConstructor
@@ -43,7 +46,8 @@ public class Persona {
     @Column(name="description")
     private String descripcion;
     @JoinColumn(name = "id_contacto")
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @NotFound(action=NotFoundAction.IGNORE)
     private Contacto contacto;
 //    @OneToMany(mappedBy = "persona", cascade = CascadeType.ALL, orphanRemoval = true)
 //    private List<Experiencia> exp;

@@ -7,15 +7,15 @@ import lombok.Setter;
 
 @Getter @Setter
 public class PersonaDto {
-    @NotBlank
+    @NotBlank(message="El nombre es obligatorio")
     private String nombre;
-    @NotBlank
+    @NotBlank(message="El apellido es obligatorio")
     private String apellido;
-    @NotBlank
+    @NotBlank(message="El stack es obligatorio")
     private String stack;
-    @NotBlank
+    @NotBlank(message="La tecnología es obligatoria")
     private String tecnologia;
-    @NotBlank
+    @NotBlank(message="La descripción es obligatoria")
     private String descripcion;
     private Contacto contacto;
 }
