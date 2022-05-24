@@ -1,6 +1,8 @@
 package com.maiaaldeco.portfolio.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.sql.Date;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -39,10 +41,10 @@ public class Estudio {
     private java.sql.Date fechaInicio;
     @Column(name = "end_date")
     private java.sql.Date fechaFin;
-    @ManyToOne(fetch= FetchType.LAZY, optional = false)
+    @JsonIgnore
+    @ManyToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch= FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_persona", nullable=false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @NotNull
     private Persona persona;
 
     public Estudio(String lugar, String curso, Date fechaInicio, Date fechaFin) {

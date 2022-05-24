@@ -2,6 +2,7 @@ package com.maiaaldeco.portfolio.dto;
 
 import com.maiaaldeco.portfolio.entity.Contacto;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,5 +18,6 @@ public class PersonaDto {
     private String tecnologia;
     @NotBlank(message="La descripción es obligatoria")
     private String descripcion;
+    @NotNull(message="El contacto es obligatorio")
     private Contacto contacto;
 }

@@ -16,8 +16,6 @@ public class EstudioDto {
     @Past(message="Fecha de inicio incorrecta")
     @NotNull(message = "La fecha de inicio es obligatoria")
     private java.sql.Date fechaInicio;
-    @Past(message="Fecha de fin incorrecta")
     private java.sql.Date fechaFin;
-    @NotNull(message = "Debes asignar una persona a este estudio")
     private Persona persona;
 }

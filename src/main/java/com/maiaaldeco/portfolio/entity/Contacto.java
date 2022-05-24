@@ -1,5 +1,6 @@
 package com.maiaaldeco.portfolio.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -36,7 +37,8 @@ public class Contacto {
     @NotNull
     @Column(name = "email")
     private String email;
-    @OneToOne(mappedBy = "contacto", orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonIgnore
+    @OneToOne(mappedBy = "contacto",fetch = FetchType.EAGER)
     @NotFound(action=NotFoundAction.IGNORE)
     private Persona persona;
 

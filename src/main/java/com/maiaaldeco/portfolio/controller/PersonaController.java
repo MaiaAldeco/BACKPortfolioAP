@@ -76,28 +76,14 @@ public class PersonaController {
                 return new ResponseEntity(new Mensaje("El contacto no esta libre"), HttpStatus.BAD_REQUEST);
             }
         }
-//        if (StringUtils.isBlank(persoDto.getNombre())) { //common lang
-//            return new ResponseEntity(new Mensaje("el nombre es obligatorio"), HttpStatus.BAD_REQUEST);
-//        }
-//        if (StringUtils.isBlank(persoDto.getApellido())) { //common lang
-//            return new ResponseEntity(new Mensaje("el apellido es obligatorio"), HttpStatus.BAD_REQUEST);
-//        }
-//        if (StringUtils.isBlank(persoDto.getStack())) {
-//            return new ResponseEntity(new Mensaje("el stack es obligatorio"), HttpStatus.BAD_REQUEST);
-//        }
-//        if (StringUtils.isBlank(persoDto.getTecnologia())) {
-//            return new ResponseEntity(new Mensaje("la tecnologia es obligatorio"), HttpStatus.BAD_REQUEST);
-//        }
-//        if (StringUtils.isBlank(persoDto.getDescripcion())) {
-//            return new ResponseEntity(new Mensaje("la descripcion es obligatoria"), HttpStatus.BAD_REQUEST);
-//        }
         Persona persona = new Persona(persoDto.getNombre(), persoDto.getApellido(), persoDto.getStack(), persoDto.getTecnologia(), persoDto.getDescripcion(), persoDto.getContacto());
+        System.out.println("PERSONA " + persona.toString());
         personaService.save(persona);
         return new ResponseEntity(new Mensaje("persona creado con éxito"), HttpStatus.OK);
     }
 
     @PostMapping("/create/{contactoId}")
-    public ResponseEntity<?> create(@Valid @PathVariable(value = "contactoId") long contactoId, @RequestBody PersonaDto persoDto, BindingResult bindingResult) {
+    public ResponseEntity<?> create(@PathVariable(value = "contactoId") long contactoId,@Valid  @RequestBody PersonaDto persoDto, BindingResult bindingResult) {
         if (!contactoService.existsById(contactoId)) {
             return new ResponseEntity(new Mensaje("no existe ese contacto"), HttpStatus.NOT_FOUND);
         }
@@ -120,18 +106,18 @@ public class PersonaController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> update(@Valid @PathVariable("id") long id, @RequestBody PersonaDto persoDto, BindingResult bindingResult) {
-        if (!personaService.existsById(id)) {
-            return new ResponseEntity(new Mensaje("La persona no existe"), HttpStatus.NOT_FOUND);
-        }
-        if(!contactoService.existsById(persoDto.getContacto().getId())){
-            return new ResponseEntity(new Mensaje("Ese contacto no existe"), HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<?> update(@PathVariable("id") long id,@Valid  @RequestBody PersonaDto persoDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             List<FieldError> errors = bindingResult.getFieldErrors();
             for (FieldError error : errors) {
                 return new ResponseEntity(new Mensaje(error.getDefaultMessage()), HttpStatus.BAD_REQUEST);
             }
+        }
+        if (!personaService.existsById(id)) {
+            return new ResponseEntity(new Mensaje("La persona no existe"), HttpStatus.NOT_FOUND);
+        }
+        if (!contactoService.existsById(persoDto.getContacto().getId())) {
+            return new ResponseEntity(new Mensaje("Ese contacto no existe"), HttpStatus.NOT_FOUND);
         }
         if (!(personaService.getOne(id).get().getContacto().getId() == persoDto.getContacto().getId())) {
             for (Persona lista : personaService.findByContactoId(persoDto.getContacto().getId())) {

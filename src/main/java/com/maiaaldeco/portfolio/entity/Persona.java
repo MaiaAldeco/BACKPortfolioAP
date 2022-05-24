@@ -1,5 +1,6 @@
 package com.maiaaldeco.portfolio.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -45,8 +46,10 @@ public class Persona {
     @NotNull
     @Column(name="description")
     private String descripcion;
+    @JsonIgnore
+    @NotNull
     @JoinColumn(name = "id_contacto")
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.MERGE, orphanRemoval = true, fetch = FetchType.EAGER)
     @NotFound(action=NotFoundAction.IGNORE)
     private Contacto contacto;
 //    @OneToMany(mappedBy = "persona", cascade = CascadeType.ALL, orphanRemoval = true)
