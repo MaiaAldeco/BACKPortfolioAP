@@ -6,13 +6,13 @@ import com.maiaaldeco.portfolio.entity.Experiencia;
 import com.maiaaldeco.portfolio.entity.Persona;
 import com.maiaaldeco.portfolio.service.IExperienciaService;
 import com.maiaaldeco.portfolio.service.IPersonaService;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +30,7 @@ public class ExperienciaController {
 
     @Autowired
     IExperienciaService experienciaService;
-    
+
     @Autowired
     IPersonaService personaService;
 
@@ -43,90 +43,87 @@ public class ExperienciaController {
     @GetMapping("/detail/{id}")
     public ResponseEntity<Experiencia> getById(@PathVariable("id") long id) {
         if (!experienciaService.existsById(id)) {
-            return new ResponseEntity(new Mensaje("no existe"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
         } else {
             Experiencia estudio = experienciaService.getOne(id).get();
             return new ResponseEntity<Experiencia>(estudio, HttpStatus.OK);
         }
     }
 
-    @GetMapping("/detailname/{nombre}")
-    public ResponseEntity<Experiencia> getByNombre(@PathVariable("nombre") String nombre) {
-        if (!experienciaService.existsByNombre(nombre)) {
-            return new ResponseEntity(new Mensaje("no existe"), HttpStatus.NOT_FOUND);
-        } else {
-            Experiencia estudio = experienciaService.getByNombre(nombre).get();
-            return new ResponseEntity<Experiencia>(estudio, HttpStatus.OK);
-        }
-    }
-    
-    @GetMapping("/persona/{persona_id}/exp")
-    public ResponseEntity<List<Experiencia>> getAllPersonasByEstudioId(@PathVariable (value = "persona_id") long persona_id){
-        if(!personaService.existsById(persona_id)){
-            return new ResponseEntity(new Mensaje("no existe"), HttpStatus.NOT_FOUND);
+    @GetMapping("/persona/{persona_id}")
+    public ResponseEntity<List<Experiencia>> getAllPersonasByEstudioId(@PathVariable(value = "persona_id") long persona_id) {
+        if (!personaService.existsById(persona_id)) {
+            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
         }
         List<Experiencia> exp = experienciaService.findByPersonaId(persona_id);
-        return new ResponseEntity<>(exp,HttpStatus.OK);
+        return new ResponseEntity<>(exp, HttpStatus.OK);
     }
 
+    @GetMapping("/detailname/{nombre}")
+    public ResponseEntity<List<Experiencia>> getByNombre(@PathVariable(value = "nombre") String nombre) {
+        if (!experienciaService.existsByNombre(nombre)) {
+            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
+        }
+        List<Experiencia> exp = experienciaService.getByNombre(nombre);
+        return new ResponseEntity<>(exp, HttpStatus.OK);
+    }
+
+    //NO RECOMENDADO
     @PostMapping("/create")
-    public ResponseEntity<?> create(@RequestBody ExperienciaDto expDto) {
-        if (StringUtils.isBlank(expDto.getNombre())) { //common lang
-            return new ResponseEntity(new Mensaje("el nombre es obligatorio"), HttpStatus.BAD_REQUEST);
-        }
-        if (StringUtils.isBlank(expDto.getPuesto())) { //common lang
-            return new ResponseEntity(new Mensaje("el puesto es obligatorio"), HttpStatus.BAD_REQUEST);
-        }
-        DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-        String inicioFecha = df.format(expDto.getFechaInicio());
-        if (StringUtils.isBlank(inicioFecha)) {
-            return new ResponseEntity(new Mensaje("la fecha de inicio es obligatorio"), HttpStatus.BAD_REQUEST);
-        }
-        if (StringUtils.isBlank(expDto.getPersona().toString())) {
-            return new ResponseEntity(new Mensaje("debes especificar de quien es esta experiencia"), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<?> create(@Valid @RequestBody ExperienciaDto expDto, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            List<FieldError> errors = bindingResult.getFieldErrors();
+            for (FieldError error : errors) {
+                return new ResponseEntity(new Mensaje(error.getDefaultMessage()), HttpStatus.BAD_REQUEST);
+            }
         }
         Experiencia exp = new Experiencia(expDto.getNombre(), expDto.getPuesto(), expDto.getTareas(), expDto.getFechaInicio(), expDto.getFechaFin(), expDto.getPersona());
         experienciaService.save(exp);
-        return new ResponseEntity(new Mensaje("experiencia creado con éxito"), HttpStatus.OK);
+        return new ResponseEntity(new Mensaje("Experiencia creado con éxito"), HttpStatus.OK);
     }
-    
+
     @PostMapping("/create/{personaId}")
-    public ResponseEntity<?> create(@PathVariable(value = "personaId") long personaId, @RequestBody ExperienciaDto expDto) {
-        if (StringUtils.isBlank(expDto.getNombre())) { //common lang
-            return new ResponseEntity(new Mensaje("el lugar es obligatorio"), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<?> create(@PathVariable(value = "personaId") long personaId, @Valid @RequestBody ExperienciaDto expDto, BindingResult bindingResult) {
+        if (!personaService.existsById(personaId)) {
+            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
         }
-        if (StringUtils.isBlank(expDto.getPuesto())) { //common lang
-            return new ResponseEntity(new Mensaje("el curso es obligatorio"), HttpStatus.BAD_REQUEST);
+
+        if (bindingResult.hasErrors()) {
+            List<FieldError> errors = bindingResult.getFieldErrors();
+            for (FieldError error : errors) {
+                return new ResponseEntity(new Mensaje(error.getDefaultMessage()), HttpStatus.BAD_REQUEST);
+            }
         }
-        DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-        String inicioFecha = df.format(expDto.getFechaInicio());
-        if (StringUtils.isBlank(inicioFecha)) {
-            return new ResponseEntity(new Mensaje("la fecha es obligatoria"), HttpStatus.BAD_REQUEST);
-        }
-        if(!personaService.existsById(personaId)){
-            return new ResponseEntity(new Mensaje("no existe esa persona"), HttpStatus.NOT_FOUND);
-        }
-        Persona  persona =  Persona.class.cast(personaService.getOne(personaId));
-        Experiencia exp = new Experiencia(expDto.getNombre(), expDto.getPuesto(), expDto.getTareas(), expDto.getFechaInicio(), expDto.getFechaFin(),persona);
+//        if (StringUtils.isBlank(expDto.getNombre())) { //common lang
+//            return new ResponseEntity(new Mensaje("el lugar es obligatorio"), HttpStatus.BAD_REQUEST);
+//        }
+//        if (StringUtils.isBlank(expDto.getPuesto())) { //common lang
+//            return new ResponseEntity(new Mensaje("el curso es obligatorio"), HttpStatus.BAD_REQUEST);
+//        }
+//        DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+//        String inicioFecha = df.format(expDto.getFechaInicio());
+//        if (StringUtils.isBlank(inicioFecha)) {
+//            return new ResponseEntity(new Mensaje("la fecha es obligatoria"), HttpStatus.BAD_REQUEST);
+//        }
+        Persona persona = personaService.getOne(personaId).get();
+        Experiencia exp = new Experiencia(expDto.getNombre(), expDto.getPuesto(), expDto.getTareas(), expDto.getFechaInicio(), expDto.getFechaFin(), persona);
         experienciaService.save(exp);
-        return new ResponseEntity(new Mensaje("experiencia creado con éxito"), HttpStatus.CREATED);
+        return new ResponseEntity(new Mensaje("Experiencia creado con éxito"), HttpStatus.CREATED);
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> update(@PathVariable("id") long id, @RequestBody ExperienciaDto expDto) {
+    public ResponseEntity<?> update(@PathVariable("id") long id, @Valid @RequestBody ExperienciaDto expDto, BindingResult bindingResult) {
         if (!experienciaService.existsById(id)) {
-            return new ResponseEntity(new Mensaje("no existe"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity(new Mensaje("No existe la experiencia a la que intenta acceder"), HttpStatus.NOT_FOUND);
         }
-        if (StringUtils.isBlank(expDto.getNombre())) { //common lang
-            return new ResponseEntity(new Mensaje("el nombre es obligatorio"), HttpStatus.BAD_REQUEST);
+        if (!personaService.existsById(expDto.getPersona().getId())) {
+            return new ResponseEntity(new Mensaje("No existe la persona a la que intenta acceder"), HttpStatus.NOT_FOUND);
         }
-        if (StringUtils.isBlank(expDto.getPuesto())) { //common lang
-            return new ResponseEntity(new Mensaje("el puesto es obligatorio"), HttpStatus.BAD_REQUEST);
-        }
-        DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-        String inicioFecha = df.format(expDto.getFechaInicio());
-        if (StringUtils.isBlank(inicioFecha)) {
-            return new ResponseEntity(new Mensaje("la fecha es obligatoria"), HttpStatus.BAD_REQUEST);
+        if (bindingResult.hasErrors()) {
+            List<FieldError> errors = bindingResult.getFieldErrors();
+            for (FieldError error : errors) {
+                return new ResponseEntity(new Mensaje(error.getDefaultMessage()), HttpStatus.BAD_REQUEST);
+            }
         }
 
         Experiencia exp = experienciaService.getOne(id).get();
@@ -138,24 +135,24 @@ public class ExperienciaController {
         exp.setPersona(expDto.getPersona());
 
         experienciaService.save(exp);
-        return new ResponseEntity(new Mensaje("experiencia actualizado con éxito"), HttpStatus.OK);
+        return new ResponseEntity(new Mensaje("Experiencia actualizado con éxito"), HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") long id) {
         if (!experienciaService.existsById(id)) {
-            return new ResponseEntity(new Mensaje("no existe"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
         }
         experienciaService.delete(id);
-        return new ResponseEntity(new Mensaje("eliminado con éxito"), HttpStatus.OK);
+        return new ResponseEntity(new Mensaje("Eliminado con éxito"), HttpStatus.OK);
     }
-    
-    @DeleteMapping("/delete/{personaId}/estudio")
-    public ResponseEntity<List<Experiencia>>deleteAllEstudiosDePersonas(@PathVariable(value = "personaId") long personaId){
-        if(!personaService.existsById(personaId)){
-            return new ResponseEntity(new Mensaje("id no encontrado"), HttpStatus.NOT_FOUND);
+
+    @DeleteMapping("/delete/{personaId}/persona")
+    public ResponseEntity<List<Experiencia>> deleteAllEstudiosDePersonas(@PathVariable(value = "personaId") long personaId) {
+        if (!personaService.existsById(personaId)) {
+            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
         }
         experienciaService.deleteByPersonaId(personaId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity(new Mensaje("Personas eliminadas con éxito"), HttpStatus.OK);
     }
 }

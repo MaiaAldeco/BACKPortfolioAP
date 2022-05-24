@@ -2,24 +2,16 @@ package com.maiaaldeco.portfolio.dto;
 
 import com.maiaaldeco.portfolio.entity.Persona;
 import javax.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-@AllArgsConstructor
 @Getter @Setter
 public class TrabajoDto {
     
-    @NotBlank
+    @NotBlank(message="El titulo es obligatorio")
     private String titulo;
-    @NotBlank
+    @NotBlank(message="La descripción es obligatoria")
     private String descripcion;
     private Persona persona;
 
-    public TrabajoDto(String titulo, String descripcion) {
-        this.titulo = titulo;
-        this.descripcion = descripcion;
-    }
-    
-    
 }

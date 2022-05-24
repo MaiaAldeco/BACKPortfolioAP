@@ -2,7 +2,6 @@ package com.maiaaldeco.portfolio.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.sql.Date;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -12,8 +11,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -42,7 +39,7 @@ public class Estudio {
     @Column(name = "end_date")
     private java.sql.Date fechaFin;
     @JsonIgnore
-    @ManyToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch= FetchType.LAZY, optional = false)
+    @ManyToOne(fetch= FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_persona", nullable=false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Persona persona;

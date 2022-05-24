@@ -26,7 +26,7 @@ public class TrabajoService implements ITrabajoService{
     }
 
     @Override
-    public Optional<Trabajo> getByTitulo(String titulo) {
+    public List<Trabajo> getByTitulo(String titulo) {
         return trabajoRepository.findByTitulo(titulo);
     }
 

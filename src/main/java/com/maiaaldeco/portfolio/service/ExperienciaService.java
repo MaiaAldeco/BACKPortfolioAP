@@ -26,7 +26,7 @@ public class ExperienciaService implements IExperienciaService{
     }
 
     @Override
-    public Optional<Experiencia> getByNombre(String nombre) {
+    public List<Experiencia> getByNombre(String nombre) {
         return experienciaRepository.findByNombre(nombre);
     }
 

@@ -1,5 +1,6 @@
 package com.maiaaldeco.portfolio.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.sql.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -38,9 +39,9 @@ public class Experiencia {
     @NotNull
     @Column(name = "start_date")
     private java.sql.Date fechaInicio;
-    @NotNull
     @Column(name = "end_date")
     private java.sql.Date fechaFin;
+    @JsonIgnore
     @ManyToOne(fetch= FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_persona", nullable=false)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -62,4 +63,13 @@ public class Experiencia {
         this.fechaFin = fechaFin;
         this.persona = persona;
     }
+
+    public Experiencia(String nombre, String puesto, Date fechaInicio, Persona persona) {
+        this.nombre = nombre;
+        this.puesto = puesto;
+        this.fechaInicio = fechaInicio;
+        this.persona = persona;
+    }
+    
+    
 }

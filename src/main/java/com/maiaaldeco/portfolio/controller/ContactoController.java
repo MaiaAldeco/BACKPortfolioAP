@@ -38,20 +38,29 @@ public class ContactoController {
     @GetMapping("/detail/{id}")
     public ResponseEntity<Contacto> getById(@PathVariable("id") long id) {
         if (!contactoService.existsById(id)) {
-            return new ResponseEntity(new Mensaje("no existe"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
         } else {
             Contacto contacto = contactoService.getOne(id).get();
             return new ResponseEntity<Contacto>(contacto, HttpStatus.OK);
         }
     }
 
+    @GetMapping("/detailemail/{email}")
+    public ResponseEntity<List<Contacto>> getByNombre(@PathVariable(value = "email") String email) {
+        if (!contactoService.existsByEmail(email)) {
+            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
+        }
+        List<Contacto> contacto = contactoService.findByEmail(email);
+        return new ResponseEntity<>(contacto, HttpStatus.OK);
+    }
+
     @PostMapping("/create")
     public ResponseEntity<?> create(@Valid @RequestBody ContactoDto contactoDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-           List<FieldError> errors = bindingResult.getFieldErrors();
-            for (FieldError error : errors ) {
+            List<FieldError> errors = bindingResult.getFieldErrors();
+            for (FieldError error : errors) {
                 return new ResponseEntity(new Mensaje(error.getDefaultMessage()), HttpStatus.BAD_REQUEST);
-                }
+            }
         }
 //        if (contactoService.existsByEmail(contactoDto.getEmail())) {
 //            return new ResponseEntity(new Mensaje("ese email ya existe"), HttpStatus.BAD_REQUEST);
@@ -73,13 +82,13 @@ public class ContactoController {
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable("id") long id, @Valid @RequestBody ContactoDto contactoDto, BindingResult bindingResult) {
         if (!contactoService.existsById(id)) {
-            return new ResponseEntity(new Mensaje("El contacto no existe"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
         }
         if (bindingResult.hasErrors()) {
             List<FieldError> errors = bindingResult.getFieldErrors();
-            for (FieldError error : errors ) {
+            for (FieldError error : errors) {
                 return new ResponseEntity(new Mensaje(error.getDefaultMessage()), HttpStatus.BAD_REQUEST);
-                }
+            }
         }
 //        if (StringUtils.isBlank(contactoDto.getLocalidad())) {
 //            return new ResponseEntity(new Mensaje("La localidad es obligatorio"), HttpStatus.BAD_REQUEST);
@@ -102,7 +111,7 @@ public class ContactoController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") long id) {
         if (!contactoService.existsById(id)) {
-            return new ResponseEntity(new Mensaje("no existe"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
         }
         contactoService.delete(id);
         return new ResponseEntity(new Mensaje("eliminado con éxito"), HttpStatus.OK);

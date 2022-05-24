@@ -45,4 +45,9 @@ public class ContactoService implements IContactoService{
         return contactoRepository.existsByEmail(email);
     }
 
+    @Override
+    public List<Contacto> findByEmail(String email) {
+        return contactoRepository.findByEmail(email);
+    }
+
 }

@@ -43,19 +43,9 @@ public class EstudioController {
     @GetMapping("/detail/{id}")
     public ResponseEntity<Estudio> getById(@PathVariable("id") long id) {
         if (!estudioService.existsById(id)) {
-            return new ResponseEntity(new Mensaje("no existe"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
         } else {
             Estudio estudio = estudioService.getOne(id).get();
-            return new ResponseEntity<Estudio>(estudio, HttpStatus.OK);
-        }
-    }
-
-    @GetMapping("/detailname/{curso}")
-    public ResponseEntity<Estudio> getByNombre(@PathVariable("curso") String curso) {
-        if (!estudioService.existsByCurso(curso)) {
-            return new ResponseEntity(new Mensaje("no existe"), HttpStatus.NOT_FOUND);
-        } else {
-            Estudio estudio = estudioService.getByCurso(curso).get();
             return new ResponseEntity<Estudio>(estudio, HttpStatus.OK);
         }
     }
@@ -63,12 +53,22 @@ public class EstudioController {
     @GetMapping("/persona/{persona_id}")
     public ResponseEntity<List<Estudio>> getAllPersonasByEstudioId(@PathVariable(value = "persona_id") long persona_id) {
         if (!personaService.existsById(persona_id)) {
-            return new ResponseEntity(new Mensaje("no existe"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
         }
         List<Estudio> estudios = estudioService.findByPersonaId(persona_id);
         return new ResponseEntity<>(estudios, HttpStatus.OK);
     }
 
+    @GetMapping("/detailname/{curso}")
+    public ResponseEntity<List<Estudio>> getByNombre(@PathVariable(value = "curso") String curso) {
+        if (!estudioService.existsByCurso(curso)) {
+            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
+        }
+        List<Estudio> estudio2 = estudioService.getByCurso(curso);
+        return new ResponseEntity<>(estudio2, HttpStatus.OK);
+    }
+
+    //NO RECOMENDADO
     @PostMapping("/create")
     public ResponseEntity<?> create(@Valid @RequestBody EstudioDto estudioDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -77,7 +77,9 @@ public class EstudioController {
                 return new ResponseEntity(new Mensaje(error.getDefaultMessage()), HttpStatus.BAD_REQUEST);
             }
         }
-
+        if (!personaService.existsById(estudioDto.getPersona().getId())) {
+            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
+        }
         Estudio estudio = new Estudio(estudioDto.getLugar(), estudioDto.getCurso(), estudioDto.getFechaInicio(), estudioDto.getFechaFin(), estudioDto.getPersona());
         estudioService.save(estudio);
         return new ResponseEntity(new Mensaje("Estudio creado con éxito"), HttpStatus.OK);
@@ -93,12 +95,12 @@ public class EstudioController {
             }
         }
         if (!personaService.existsById(personaId)) {
-            return new ResponseEntity(new Mensaje("no existe esa persona"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
         }
         Persona persona = personaService.getOne(personaId).get();
         Estudio estudio = new Estudio(estudioDto.getCurso(), estudioDto.getLugar(), estudioDto.getFechaInicio(), estudioDto.getFechaFin(), persona);
         estudioService.save(estudio);
-        return new ResponseEntity(new Mensaje("estudio creado con éxito"), HttpStatus.CREATED);
+        return new ResponseEntity(new Mensaje("Estudio creado con éxito"), HttpStatus.CREATED);
     }
 
     @PutMapping("/update/{id}")
@@ -110,10 +112,10 @@ public class EstudioController {
             }
         }
         if (!estudioService.existsById(id)) {
-            return new ResponseEntity(new Mensaje("Ese curso/carrera no existe"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity(new Mensaje("No existe el estudio al que intenta acceder"), HttpStatus.NOT_FOUND);
         }
-        if(!personaService.existsById(estudioDto.getPersona().getId())){
-            return new ResponseEntity(new Mensaje("La persona no existe"), HttpStatus.NOT_FOUND);
+        if (!personaService.existsById(estudioDto.getPersona().getId())) {
+            return new ResponseEntity(new Mensaje("No existe la persona a la que intenta acceder"), HttpStatus.NOT_FOUND);
         }
 
         Estudio estudio = estudioService.getOne(id).get();
@@ -124,25 +126,25 @@ public class EstudioController {
         estudio.setPersona(estudioDto.getPersona());
 
         estudioService.save(estudio);
-        return new ResponseEntity(new Mensaje("estudio actualizado con éxito"), HttpStatus.OK);
+        return new ResponseEntity(new Mensaje("Estudio actualizado con éxito"), HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") long id) {
         if (!estudioService.existsById(id)) {
-            return new ResponseEntity(new Mensaje("No existe ese curso/carrera"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
         }
         estudioService.delete(id);
-        return new ResponseEntity(new Mensaje("eliminado con éxito"), HttpStatus.OK);
+        return new ResponseEntity(new Mensaje("Eliminado con éxito"), HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete/estudio/{personaId}")
+    @DeleteMapping("/delete/{personaId}/persona")
     public ResponseEntity<List<Estudio>> deleteAllEstudiosDePersonas(@PathVariable(value = "personaId") long personaId) {
         if (!personaService.existsById(personaId)) {
-            return new ResponseEntity(new Mensaje("id no encontrado"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
         }
         System.out.println("ID PERSONA " + personaId);
         estudioService.deleteByPersonaId(personaId);
-        return new ResponseEntity(new Mensaje("Personas eliminadas con éxito"), HttpStatus.NO_CONTENT);
+        return new ResponseEntity(new Mensaje("Persona eliminada de los trabajos con éxito"), HttpStatus.OK);
     }
 }

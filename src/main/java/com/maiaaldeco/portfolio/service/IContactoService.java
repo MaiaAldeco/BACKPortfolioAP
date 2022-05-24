@@ -13,4 +13,5 @@ public interface IContactoService {
     public void delete(long id);
     public boolean existsById(long id);
     boolean existsByEmail(String email);
+    List<Contacto>findByEmail(String email);
 }

@@ -8,7 +8,7 @@ public interface IEstudioService {
     
     public List<Estudio> list();
     public Optional<Estudio> getOne(long id);
-    public Optional<Estudio> getByCurso(String curso);
+    public List<Estudio> getByCurso(String curso);
     public void save(Estudio estudio);
     public void delete(long id);
     public boolean existsById(long id);

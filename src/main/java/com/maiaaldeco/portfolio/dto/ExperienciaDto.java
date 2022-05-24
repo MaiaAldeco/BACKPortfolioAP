@@ -1,52 +1,22 @@
 package com.maiaaldeco.portfolio.dto;
 
 import com.maiaaldeco.portfolio.entity.Persona;
-import java.sql.Date;
 import javax.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Past;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter @Setter
 public class ExperienciaDto {
-    @NotBlank
+    @NotBlank(message = "El nombre es obligatorio")
     private String nombre;
-    @NotBlank
+    @NotBlank(message = "El puesto de trabajo es obligatorio")
     private String puesto;
     private String tareas;
-    @NotBlank
+    @NotNull(message = "La fecha de inicio es obligatoria")
+    @Past(message="Fecha de inicio incorrecta")
     private java.sql.Date fechaInicio;
     private java.sql.Date fechaFin;
-    private Persona persona;
-
-    public ExperienciaDto(String nombre, String puesto, String tareas, Date fechaInicio, Persona persona) {
-        this.nombre = nombre;
-        this.puesto = puesto;
-        this.tareas = tareas;
-        this.fechaInicio = fechaInicio;
-        this.persona = persona;
-        
-        
-    }
-
-    public ExperienciaDto(String nombre, String puesto, String tareas, Date fechaInicio, Date fechaFin) {
-        this.nombre = nombre;
-        this.puesto = puesto;
-        this.tareas = tareas;
-        this.fechaInicio = fechaInicio;
-        this.fechaFin = fechaFin;
-    }
-
-    public ExperienciaDto(String nombre, String puesto, String tareas, Date fechaInicio) {
-        this.nombre = nombre;
-        this.puesto = puesto;
-        this.tareas = tareas;
-        this.fechaInicio = fechaInicio;
-    }
-    
-    
-    
+    private Persona persona;  
 }

@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository;
 public interface ContactoRepository extends JpaRepository<Contacto, Long>{
     boolean existsByEmail(String email);
     List<Contacto>findByPersonaId(long id);
+    List<Contacto>findByEmail(String email);
 }

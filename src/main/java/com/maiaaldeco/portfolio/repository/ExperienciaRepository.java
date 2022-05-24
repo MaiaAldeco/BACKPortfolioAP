@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ExperienciaRepository extends JpaRepository<Experiencia, Long>{
-    Optional<Experiencia>findByNombre(String nombre);
+    List<Experiencia>findByNombre(String nombre);
     boolean existsByNombre(String nombre);
     List<Experiencia>findByPersonaId(long id);
     void deleteByPersonaId(long personaId);

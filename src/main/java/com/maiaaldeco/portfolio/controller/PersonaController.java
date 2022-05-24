@@ -43,7 +43,7 @@ public class PersonaController {
     @GetMapping("/detail/{id}")
     public ResponseEntity<Persona> getById(@PathVariable("id") long id) {
         if (!personaService.existsById(id)) {
-            return new ResponseEntity(new Mensaje("no existe"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
         } else {
             Persona persona = personaService.getOne(id).get();
             return new ResponseEntity<Persona>(persona, HttpStatus.OK);
@@ -53,12 +53,22 @@ public class PersonaController {
     @GetMapping("/contacto/{contactoId}")
     public ResponseEntity<List<Persona>> getAllPersonasByEstudioId(@PathVariable(value = "contactoId") long contactoId) {
         if (!contactoService.existsById(contactoId)) {
-            return new ResponseEntity(new Mensaje("no existe"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
         }
         List<Persona> contactos = personaService.findByContactoId(contactoId);
         return new ResponseEntity<>(contactos, HttpStatus.OK);
     }
 
+    @GetMapping("/detailname/{apellido}")
+    public ResponseEntity<List<Persona>> getByNombre(@PathVariable(value = "apellido") String apellido) {
+        if (!personaService.existsByApellido(apellido)) {
+            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
+        }
+        List<Persona> persona = personaService.findByApellido(apellido);
+        return new ResponseEntity<>(persona, HttpStatus.OK);
+    }
+
+    //NO RECOMENDADO
     @PostMapping("/create")
     public ResponseEntity<?> create(@Valid @RequestBody PersonaDto persoDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -68,7 +78,7 @@ public class PersonaController {
             }
         }
         if (!contactoService.existsById(persoDto.getContacto().getId())) {
-            return new ResponseEntity(new Mensaje("El contacto no existe"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.BAD_REQUEST);
         }
 
         for (Persona lista : personaService.findByContactoId(persoDto.getContacto().getId())) {
@@ -79,13 +89,13 @@ public class PersonaController {
         Persona persona = new Persona(persoDto.getNombre(), persoDto.getApellido(), persoDto.getStack(), persoDto.getTecnologia(), persoDto.getDescripcion(), persoDto.getContacto());
         System.out.println("PERSONA " + persona.toString());
         personaService.save(persona);
-        return new ResponseEntity(new Mensaje("persona creado con éxito"), HttpStatus.OK);
+        return new ResponseEntity(new Mensaje("Persona creado con éxito"), HttpStatus.OK);
     }
 
     @PostMapping("/create/{contactoId}")
-    public ResponseEntity<?> create(@PathVariable(value = "contactoId") long contactoId,@Valid  @RequestBody PersonaDto persoDto, BindingResult bindingResult) {
+    public ResponseEntity<?> create(@PathVariable(value = "contactoId") long contactoId, @Valid @RequestBody PersonaDto persoDto, BindingResult bindingResult) {
         if (!contactoService.existsById(contactoId)) {
-            return new ResponseEntity(new Mensaje("no existe ese contacto"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
         }
         if (bindingResult.hasErrors()) {
             List<FieldError> errors = bindingResult.getFieldErrors();
@@ -102,11 +112,11 @@ public class PersonaController {
         Contacto contacto = contactoService.getOne(contactoId).get();
         Persona persona = new Persona(persoDto.getNombre(), persoDto.getApellido(), persoDto.getStack(), persoDto.getStack(), persoDto.getTecnologia(), contacto);
         personaService.save(persona);
-        return new ResponseEntity(new Mensaje("persona creado con éxito"), HttpStatus.CREATED);
+        return new ResponseEntity(new Mensaje("Persona creado con éxito"), HttpStatus.CREATED);
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> update(@PathVariable("id") long id,@Valid  @RequestBody PersonaDto persoDto, BindingResult bindingResult) {
+    public ResponseEntity<?> update(@PathVariable("id") long id, @Valid @RequestBody PersonaDto persoDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             List<FieldError> errors = bindingResult.getFieldErrors();
             for (FieldError error : errors) {
@@ -114,10 +124,10 @@ public class PersonaController {
             }
         }
         if (!personaService.existsById(id)) {
-            return new ResponseEntity(new Mensaje("La persona no existe"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity(new Mensaje("No existe la persona a al que intenta acceder"), HttpStatus.NOT_FOUND);
         }
         if (!contactoService.existsById(persoDto.getContacto().getId())) {
-            return new ResponseEntity(new Mensaje("Ese contacto no existe"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity(new Mensaje("No existe el contacto al que intenta acceder"), HttpStatus.NOT_FOUND);
         }
         if (!(personaService.getOne(id).get().getContacto().getId() == persoDto.getContacto().getId())) {
             for (Persona lista : personaService.findByContactoId(persoDto.getContacto().getId())) {
@@ -136,15 +146,15 @@ public class PersonaController {
         persona.setContacto(persoDto.getContacto());
 
         personaService.save(persona);
-        return new ResponseEntity(new Mensaje("persona actualizado con éxito"), HttpStatus.OK);
+        return new ResponseEntity(new Mensaje("Persona actualizado con éxito"), HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") long id) {
         if (!personaService.existsById(id)) {
-            return new ResponseEntity(new Mensaje("La persona no existe"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
         }
         personaService.delete(id);
-        return new ResponseEntity(new Mensaje("eliminado con éxito"), HttpStatus.OK);
+        return new ResponseEntity(new Mensaje("Eliminado con éxito"), HttpStatus.OK);
     }
 }

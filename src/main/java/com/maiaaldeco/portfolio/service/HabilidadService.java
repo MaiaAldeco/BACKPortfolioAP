@@ -26,7 +26,7 @@ public class HabilidadService implements IHabilidadService{
     }
 
     @Override
-    public Optional<Habilidad> getByHabilidad(String habilidad) {
+    public List<Habilidad> getByHabilidad(String habilidad) {
         return habilidadRepository.findByHabilidad(habilidad);
     }
 
@@ -59,4 +59,5 @@ public class HabilidadService implements IHabilidadService{
     public void deleteByPersonaId(long personaId) {
         habilidadRepository.deleteByPersonaId(personaId);
     }
+
 }

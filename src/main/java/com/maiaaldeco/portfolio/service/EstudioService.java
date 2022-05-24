@@ -26,7 +26,7 @@ public class EstudioService implements IEstudioService{
     }
 
     @Override
-    public Optional<Estudio> getByCurso(String curso) {
+    public List<Estudio> getByCurso(String curso) {
         return estudioRepository.findByCurso(curso);
     }
 
@@ -57,6 +57,6 @@ public class EstudioService implements IEstudioService{
 
     @Override
     public void deleteByPersonaId(long personaId) {
-        
+        estudioRepository.deleteByPersonaId(personaId);
     }
 }

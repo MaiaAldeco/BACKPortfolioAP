@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository;
 public interface PersonaRepository extends JpaRepository<Persona, Long>{
     Optional<Persona>findByNombre(String nombre);
     boolean existsByNombre(String nombre);
+    boolean existsByApellido(String apellido);
+    List<Persona>findByApellido(String apellido);
     List<Persona>findByContactoId(long id);
     void deleteByContactoId(long personaId);
 }

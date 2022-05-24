@@ -1,5 +1,6 @@
 package com.maiaaldeco.portfolio.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -35,6 +36,7 @@ public class Habilidad {
     @ManyToOne(fetch= FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_persona", nullable=false)
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore
     private Persona persona;
 
     public Habilidad(String habilidad, int porcentaje) {

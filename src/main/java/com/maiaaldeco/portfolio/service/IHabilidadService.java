@@ -8,7 +8,7 @@ public interface IHabilidadService {
     
     public List<Habilidad> list();
     public Optional<Habilidad> getOne(long id);
-    public Optional<Habilidad> getByHabilidad(String habilidad);
+    public List<Habilidad> getByHabilidad(String habilidad);
     public void save(Habilidad habilidad);
     public void delete(long id);
     public boolean existsById(long id);

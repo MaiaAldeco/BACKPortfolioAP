@@ -1,5 +1,6 @@
 package com.maiaaldeco.portfolio.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -19,7 +20,6 @@ import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @NoArgsConstructor
-@AllArgsConstructor
 @Getter @Setter
 @Table(name="trabajos")
 public class Trabajo {
@@ -34,6 +34,7 @@ public class Trabajo {
     @NotNull
     @Column(name = "description")
     private String descripcion;
+    @JsonIgnore
     @ManyToOne(fetch= FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_persona", nullable=false)
     @OnDelete(action = OnDeleteAction.CASCADE)
