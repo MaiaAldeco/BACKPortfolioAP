@@ -3,6 +3,7 @@ package com.maiaaldeco.portfolio.controller;
 import com.maiaaldeco.portfolio.dto.ContactoDto;
 import com.maiaaldeco.portfolio.dto.Mensaje;
 import com.maiaaldeco.portfolio.entity.Contacto;
+import com.maiaaldeco.portfolio.entity.Persona;
 import com.maiaaldeco.portfolio.service.IContactoService;
 import java.util.List;
 import javax.validation.Valid;
@@ -117,6 +118,11 @@ public class ContactoController {
         if (!contactoService.existsById(id)) {
             return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
         }
+        Persona persona = contactoService.getOne(id).get().getPersona();
+        if((Long)persona.getId()!=null){
+            return new ResponseEntity(new Mensaje("No es posible eliminar el contacto de " + persona.getApellido()), HttpStatus.BAD_REQUEST);
+        }
+        
         contactoService.delete(id);
         return new ResponseEntity(new Mensaje("eliminado con éxito"), HttpStatus.OK);
     }

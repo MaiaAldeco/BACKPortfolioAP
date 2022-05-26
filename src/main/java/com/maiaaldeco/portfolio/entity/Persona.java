@@ -1,6 +1,7 @@
 package com.maiaaldeco.portfolio.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.maiaaldeco.portfolio.security.entity.Usuario;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -22,42 +23,40 @@ import org.hibernate.annotations.NotFoundAction;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter @Setter
-@Table(name="person")
+@Getter
+@Setter
+@Table(name = "person")
 public class Persona {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="id_person")
+    @Column(name = "id_person")
     private long id;
-    
+
     @NotNull
-    @Column(name="firstname")
+    @Column(name = "firstname")
     private String nombre;
     @NotNull
-    @Column(name="lastname")
+    @Column(name = "lastname")
     private String apellido;
     @NotNull
-    @Column(name="stack")
+    @Column(name = "stack")
     private String stack;
     @NotNull
-    @Column(name="tech")
+    @Column(name = "tech")
     private String tecnologia;
     @NotNull
-    @Column(name="description")
+    @Column(name = "description", length = 4000)
     private String descripcion;
     @JsonIgnore
     @NotNull
-    @JoinColumn(name = "id_contacto")
-    @OneToOne(cascade = CascadeType.MERGE, orphanRemoval = true, fetch = FetchType.EAGER)
-    @NotFound(action=NotFoundAction.IGNORE)
+    @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "contacto_id")
     private Contacto contacto;
-//    @OneToMany(mappedBy = "persona", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<Experiencia> exp;
-//    @OneToMany(mappedBy = "persona", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<Estudio> estudio;
-//    @OneToMany(mappedBy = "persona", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<Trabajo> trabajo;
+    @OneToOne(cascade = CascadeType.PERSIST,fetch = FetchType.EAGER)
+    @JoinColumn(name = "usuario_id")
+    @JsonIgnore
+    private Usuario usuario;
 
     public Persona(String nombre, String apellido, String stack, String tecnologia, String descripcion) {
         this.nombre = nombre;
@@ -74,5 +73,15 @@ public class Persona {
         this.tecnologia = tecnologia;
         this.descripcion = descripcion;
         this.contacto = contacto;
-    }    
+    }
+
+    public Persona(String nombre, String apellido, String stack, String tecnologia, String descripcion, Usuario usuario, Contacto contacto) {
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.stack = stack;
+        this.tecnologia = tecnologia;
+        this.descripcion = descripcion;
+        this.usuario = usuario;
+        this.contacto = contacto;
+    }
 }

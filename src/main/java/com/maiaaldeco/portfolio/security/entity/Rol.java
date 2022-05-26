@@ -1,6 +1,8 @@
 package com.maiaaldeco.portfolio.security.entity;
 
 import com.maiaaldeco.portfolio.security.enums.RolNombre;
+import java.io.Serializable;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -16,12 +18,14 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Rol {
+public class Rol implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="id_rol")
     private long id;
     @NotNull
+    @Column(name="rol_name")
     @Enumerated(EnumType.STRING)
     private RolNombre rolNombre;
 

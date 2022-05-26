@@ -38,8 +38,7 @@ public class Contacto {
     @Column(name = "email")
     private String email;
     @JsonIgnore
-    @OneToOne(mappedBy = "contacto",fetch = FetchType.EAGER)
-    @NotFound(action=NotFoundAction.IGNORE)
+    @OneToOne(mappedBy = "contacto")
     private Persona persona;
 
     public Contacto(String localidad, String telefono, String email) {

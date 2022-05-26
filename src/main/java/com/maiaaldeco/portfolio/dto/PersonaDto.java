@@ -18,6 +18,5 @@ public class PersonaDto {
     private String tecnologia;
     @NotBlank(message="La descripción es obligatoria")
     private String descripcion;
-    @NotNull(message="El contacto es obligatorio")
     private Contacto contacto;
 }

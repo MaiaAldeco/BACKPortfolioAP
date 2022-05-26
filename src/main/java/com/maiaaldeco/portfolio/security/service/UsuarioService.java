@@ -9,29 +9,29 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
-public class UsuarioService{
+public class UsuarioService {
 
     @Autowired
     UsuarioRepository usuarioRepository;
-    
-    
+
     public Optional<Usuario> getByNombreUsuario(String nombreUsuario) {
         return usuarioRepository.findByNombreUsuario(nombreUsuario);
     }
 
-    
     public boolean existsByNombreUsuario(String nombreUsuario) {
         return usuarioRepository.existsByNombreUsuario(nombreUsuario);
     }
 
-    
     public boolean existsByEmail(String email) {
         return usuarioRepository.existsByEmail(email);
     }
 
-    
     public void save(Usuario usu) {
         usuarioRepository.save(usu);
     }
-    
+
+    public boolean existsById(long id) {
+        return usuarioRepository.existsById(id);
+    }
+
 }
