@@ -9,6 +9,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -53,7 +54,8 @@ public class ContactoController {
         List<Contacto> contacto = contactoService.findByEmail(email);
         return new ResponseEntity<>(contacto, HttpStatus.OK);
     }
-
+    
+    //@PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create")
     public ResponseEntity<?> create(@Valid @RequestBody ContactoDto contactoDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -78,7 +80,8 @@ public class ContactoController {
         contactoService.save(contacto);
         return new ResponseEntity(new Mensaje("Contacto creado con éxito"), HttpStatus.OK);
     }
-
+    
+    //@PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable("id") long id, @Valid @RequestBody ContactoDto contactoDto, BindingResult bindingResult) {
         if (!contactoService.existsById(id)) {
@@ -108,6 +111,7 @@ public class ContactoController {
         return new ResponseEntity(new Mensaje("Contacto actualizado con éxito"), HttpStatus.OK);
     }
 
+    //@PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") long id) {
         if (!contactoService.existsById(id)) {
