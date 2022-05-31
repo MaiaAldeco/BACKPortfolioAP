@@ -32,7 +32,7 @@ public class Trabajo {
     @Column(name = "title")
     private String titulo;
     @NotNull
-    @Column(name = "description")
+    @Column(name = "description", length = 3000)
     private String descripcion;
     @JsonIgnore
     @ManyToOne(fetch= FetchType.LAZY, optional = false)

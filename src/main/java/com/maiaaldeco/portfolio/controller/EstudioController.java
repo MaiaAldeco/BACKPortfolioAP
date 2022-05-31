@@ -6,11 +6,13 @@ import com.maiaaldeco.portfolio.entity.Estudio;
 import com.maiaaldeco.portfolio.entity.Persona;
 import com.maiaaldeco.portfolio.service.IEstudioService;
 import com.maiaaldeco.portfolio.service.IPersonaService;
+import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -33,13 +35,15 @@ public class EstudioController {
 
     @Autowired
     IPersonaService personaService;
-
+    
+    @ApiOperation("Muestra una lista de estudios")
     @GetMapping("/lista")
     public ResponseEntity<List<Estudio>> list() {
         List<Estudio> list = estudioService.list();
         return new ResponseEntity<List<Estudio>>(list, HttpStatus.OK);
     }
 
+    @ApiOperation("Muestra el detalle de un estudio por id")
     @GetMapping("/detail/{id}")
     public ResponseEntity<Estudio> getById(@PathVariable("id") long id) {
         if (!estudioService.existsById(id)) {
@@ -50,6 +54,7 @@ public class EstudioController {
         }
     }
 
+    @ApiOperation("Muestra un estudio por id de la persona")
     @GetMapping("/persona/{persona_id}")
     public ResponseEntity<List<Estudio>> getAllPersonasByEstudioId(@PathVariable(value = "persona_id") long persona_id) {
         if (!personaService.existsById(persona_id)) {
@@ -59,6 +64,7 @@ public class EstudioController {
         return new ResponseEntity<>(estudios, HttpStatus.OK);
     }
 
+    @ApiOperation("Muestra el detalle de un estudio por nombre del curso")
     @GetMapping("/detailname/{curso}")
     public ResponseEntity<List<Estudio>> getByNombre(@PathVariable(value = "curso") String curso) {
         if (!estudioService.existsByCurso(curso)) {
@@ -68,7 +74,9 @@ public class EstudioController {
         return new ResponseEntity<>(estudio2, HttpStatus.OK);
     }
 
-    //NO RECOMENDADO
+    //SE ASIGNA A LA PERSONA DUEÑA DEL PORTFOLIO
+    @ApiOperation("Crea un nuevo estudio")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create")
     public ResponseEntity<?> create(@Valid @RequestBody EstudioDto estudioDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -77,14 +85,17 @@ public class EstudioController {
                 return new ResponseEntity(new Mensaje(error.getDefaultMessage()), HttpStatus.BAD_REQUEST);
             }
         }
-        if (!personaService.existsById(estudioDto.getPersona().getId())) {
-            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
+        if (personaService.list().isEmpty()) {
+            return new ResponseEntity(new Mensaje("No existe una persona para crear los datos"), HttpStatus.NOT_FOUND);
         }
-        Estudio estudio = new Estudio(estudioDto.getLugar(), estudioDto.getCurso(), estudioDto.getFechaInicio(), estudioDto.getFechaFin(), estudioDto.getPersona());
+        Persona persona = personaService.list().stream().filter(e -> e != null).findFirst().orElse(null);
+        Estudio estudio = new Estudio(estudioDto.getLugar(), estudioDto.getCurso(), estudioDto.getFechaInicio(), estudioDto.getFechaFin(), persona);
         estudioService.save(estudio);
         return new ResponseEntity(new Mensaje("Estudio creado con éxito"), HttpStatus.OK);
     }
 
+    @ApiOperation("Crea un nuevo estudio por id de la persona")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create/{personaId}")
     public ResponseEntity<?> create(@PathVariable(value = "personaId") long personaId, @Valid @RequestBody EstudioDto estudioDto, BindingResult bindingResult) {
 
@@ -103,6 +114,8 @@ public class EstudioController {
         return new ResponseEntity(new Mensaje("Estudio creado con éxito"), HttpStatus.CREATED);
     }
 
+    @ApiOperation("Actualizar un estudio por id")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable("id") long id, @Valid @RequestBody EstudioDto estudioDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -114,21 +127,26 @@ public class EstudioController {
         if (!estudioService.existsById(id)) {
             return new ResponseEntity(new Mensaje("No existe el estudio al que intenta acceder"), HttpStatus.NOT_FOUND);
         }
-        if (!personaService.existsById(estudioDto.getPersona().getId())) {
-            return new ResponseEntity(new Mensaje("No existe la persona a la que intenta acceder"), HttpStatus.NOT_FOUND);
+        
+        if (personaService.list().isEmpty()) {
+            return new ResponseEntity(new Mensaje("No existe una persona para asignar este estudio"), HttpStatus.BAD_REQUEST);
         }
+
+        Persona persona = personaService.list().stream().filter(e -> e != null).findFirst().orElse(null);
 
         Estudio estudio = estudioService.getOne(id).get();
         estudio.setCurso(estudioDto.getCurso());
         estudio.setLugar(estudioDto.getLugar());
         estudio.setFechaInicio(estudioDto.getFechaInicio());
         estudio.setFechaFin(estudioDto.getFechaFin());
-        estudio.setPersona(estudioDto.getPersona());
+        estudio.setPersona(persona);
 
         estudioService.save(estudio);
         return new ResponseEntity(new Mensaje("Estudio actualizado con éxito"), HttpStatus.OK);
     }
 
+    @ApiOperation("Elimina un estudio por id")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") long id) {
         if (!estudioService.existsById(id)) {
@@ -138,6 +156,8 @@ public class EstudioController {
         return new ResponseEntity(new Mensaje("Eliminado con éxito"), HttpStatus.OK);
     }
 
+    @ApiOperation("Elimina un estudio por id de persona")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{personaId}/persona")
     public ResponseEntity<List<Estudio>> deleteAllEstudiosDePersonas(@PathVariable(value = "personaId") long personaId) {
         if (!personaService.existsById(personaId)) {

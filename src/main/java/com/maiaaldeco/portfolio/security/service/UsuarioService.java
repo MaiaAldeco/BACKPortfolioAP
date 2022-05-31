@@ -2,6 +2,7 @@ package com.maiaaldeco.portfolio.security.service;
 
 import com.maiaaldeco.portfolio.security.entity.Usuario;
 import com.maiaaldeco.portfolio.security.repository.UsuarioRepository;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,9 @@ public class UsuarioService {
     @Autowired
     UsuarioRepository usuarioRepository;
 
+    public List<Usuario> list(){
+        return usuarioRepository.findAll();
+    }
     public Optional<Usuario> getByNombreUsuario(String nombreUsuario) {
         return usuarioRepository.findByNombreUsuario(nombreUsuario);
     }

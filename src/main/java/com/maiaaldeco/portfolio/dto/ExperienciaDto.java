@@ -13,7 +13,7 @@ public class ExperienciaDto {
     private String nombre;
     @NotBlank(message = "El puesto de trabajo es obligatorio")
     private String puesto;
-    private String tareas;
+    private String descripcion;
     @NotNull(message = "La fecha de inicio es obligatoria")
     @Past(message="Fecha de inicio incorrecta")
     private java.sql.Date fechaInicio;

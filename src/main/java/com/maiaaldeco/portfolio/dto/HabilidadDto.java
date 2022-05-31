@@ -9,9 +9,9 @@ import lombok.Setter;
 
 @Getter @Setter
 public class HabilidadDto {
-    @NotBlank
-    private String habilidadNombre;
-    @NotNull
+    @NotBlank(message = "El nombre es obligatorio")
+    private String habilidad;
+    @NotNull(message = "El porcentaje es obligatorio")
     @Min(value = 0, message ="El porcentaje debe ser mayor a cero")
     private Integer porcentaje;
     private Persona persona;

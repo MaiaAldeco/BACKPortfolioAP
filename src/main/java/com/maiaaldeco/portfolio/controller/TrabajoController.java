@@ -6,11 +6,13 @@ import com.maiaaldeco.portfolio.entity.Persona;
 import com.maiaaldeco.portfolio.entity.Trabajo;
 import com.maiaaldeco.portfolio.service.IPersonaService;
 import com.maiaaldeco.portfolio.service.ITrabajoService;
+import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -34,12 +36,14 @@ public class TrabajoController {
     @Autowired
     IPersonaService personaService;
 
+    @ApiOperation("Muestra una lista de proyectos")
     @GetMapping("/lista")
     public ResponseEntity<List<Trabajo>> list() {
         List<Trabajo> list = trabajoService.list();
         return new ResponseEntity<List<Trabajo>>(list, HttpStatus.OK);
     }
 
+    @ApiOperation("Muestra un proyecto por id")
     @GetMapping("/detail/{id}")
     public ResponseEntity<Trabajo> getById(@PathVariable("id") long id) {
         if (!trabajoService.existsById(id)) {
@@ -50,6 +54,7 @@ public class TrabajoController {
         }
     }
 
+    @ApiOperation("Muestra una lista de proyectos por nombre")
     @GetMapping("/detailname/{titulo}")
     public ResponseEntity<List<Trabajo>> getByNombre(@PathVariable(value = "titulo") String titulo) {
         if (!trabajoService.existsByTitulo(titulo)) {
@@ -59,6 +64,7 @@ public class TrabajoController {
         return new ResponseEntity<>(skill, HttpStatus.OK);
     }
 
+    @ApiOperation("Muestra una lista de proyectos por id persona")
     @GetMapping("/persona/{persona_id}")
     public ResponseEntity<List<Trabajo>> getAllPersonasByEstudioId(@PathVariable(value = "persona_id") long persona_id) {
         if (!personaService.existsById(persona_id)) {
@@ -68,7 +74,9 @@ public class TrabajoController {
         return new ResponseEntity<>(exp, HttpStatus.OK);
     }
 
-    //NO RECOMENDADO
+    //CREA UN TRABAJO ASIGNANDOLO AUTOMATICAMENTE A LA PERSONA DUEÑA DEL PORTFOLIO
+    @ApiOperation("Crea un proyecto")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create")
     public ResponseEntity<?> create(@Valid @RequestBody TrabajoDto trabajoDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -77,21 +85,18 @@ public class TrabajoController {
                 return new ResponseEntity(new Mensaje(error.getDefaultMessage()), HttpStatus.BAD_REQUEST);
             }
         }
-        if (!personaService.existsById(trabajoDto.getPersona().getId())) {
-            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
+        
+        if (personaService.list().isEmpty()) {
+            return new ResponseEntity(new Mensaje("No existe una persona para crear los datos"), HttpStatus.NOT_FOUND);
         }
-//        if (StringUtils.isBlank(trabajoDto.getTitulo())) { //common lang
-//            return new ResponseEntity(new Mensaje("el titulo es obligatorio"), HttpStatus.BAD_REQUEST);
-//        }
-//        if (StringUtils.isBlank(trabajoDto.getDescripcion())) { //common lang
-//            return new ResponseEntity(new Mensaje("la descripcion es obligatorio"), HttpStatus.BAD_REQUEST);
-//        }
-
-        Trabajo trabajo = new Trabajo(trabajoDto.getTitulo(), trabajoDto.getDescripcion(), trabajoDto.getPersona());
+        Persona persona = personaService.list().stream().filter(e -> e != null).findFirst().orElse(null);
+        Trabajo trabajo = new Trabajo(trabajoDto.getTitulo(), trabajoDto.getDescripcion(), persona);
         trabajoService.save(trabajo);
         return new ResponseEntity(new Mensaje("trabajo creado con éxito"), HttpStatus.OK);
     }
 
+    @ApiOperation("Crea un trabajo por id persona")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create/{personaId}")
     public ResponseEntity<?> create(@PathVariable(value = "personaId") long personaId, @Valid @RequestBody TrabajoDto trabajoDto, BindingResult bindingResult) {
 
@@ -110,6 +115,8 @@ public class TrabajoController {
         return new ResponseEntity(new Mensaje("Estudio creado con éxito"), HttpStatus.CREATED);
     }
 
+    @ApiOperation("Actualiza una proyecto por id")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable("id") long id, @Valid @RequestBody TrabajoDto trabajoDto, BindingResult bindingResult) {
         if (!trabajoService.existsById(id)) {
@@ -121,19 +128,22 @@ public class TrabajoController {
                 return new ResponseEntity(new Mensaje(error.getDefaultMessage()), HttpStatus.BAD_REQUEST);
             }
         }
-        if (!personaService.existsById(trabajoDto.getPersona().getId())) {
-            return new ResponseEntity(new Mensaje("No existe la persona a la que intenta acceder"), HttpStatus.NOT_FOUND);
+        if (personaService.list().isEmpty()) {
+            return new ResponseEntity(new Mensaje("No existe una persona para asignar este estudio"), HttpStatus.BAD_REQUEST);
         }
 
+        Persona persona = personaService.list().stream().filter(e -> e != null).findFirst().orElse(null);
         Trabajo trabajo = trabajoService.getOne(id).get();
         trabajo.setTitulo(trabajoDto.getTitulo());
         trabajo.setDescripcion(trabajoDto.getDescripcion());
-        trabajo.setPersona(trabajoDto.getPersona());
+        trabajo.setPersona(persona);
 
         trabajoService.save(trabajo);
         return new ResponseEntity(new Mensaje("Trabajo actualizado con éxito"), HttpStatus.OK);
     }
 
+    @ApiOperation("Elimina un proyecto por id")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") long id) {
         if (!trabajoService.existsById(id)) {
@@ -143,6 +153,8 @@ public class TrabajoController {
         return new ResponseEntity(new Mensaje("Trabajo eliminado con éxito"), HttpStatus.OK);
     }
 
+    @ApiOperation("Elimina los proyectos por id persona")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{personaId}/trabajo")
     public ResponseEntity<List<Trabajo>> deleteAllEstudiosDePersonas(@PathVariable(value = "personaId") long personaId) {
         if (!personaService.existsById(personaId)) {

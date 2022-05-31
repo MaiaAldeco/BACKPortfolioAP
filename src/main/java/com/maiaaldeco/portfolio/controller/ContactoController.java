@@ -5,6 +5,7 @@ import com.maiaaldeco.portfolio.dto.Mensaje;
 import com.maiaaldeco.portfolio.entity.Contacto;
 import com.maiaaldeco.portfolio.entity.Persona;
 import com.maiaaldeco.portfolio.service.IContactoService;
+import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,13 +31,15 @@ public class ContactoController {
 
     @Autowired
     IContactoService contactoService;
-
+    
+    @ApiOperation("Muestra una lista de contactos")
     @GetMapping("/lista")
     public ResponseEntity<List<Contacto>> list() {
         List<Contacto> list = contactoService.list();
         return new ResponseEntity<List<Contacto>>(list, HttpStatus.OK);
     }
 
+    @ApiOperation("Muestra el detalle de un contacto por id")
     @GetMapping("/detail/{id}")
     public ResponseEntity<Contacto> getById(@PathVariable("id") long id) {
         if (!contactoService.existsById(id)) {
@@ -47,6 +50,7 @@ public class ContactoController {
         }
     }
 
+    @ApiOperation("Muestra una lista de contactos por email")
     @GetMapping("/detailemail/{email}")
     public ResponseEntity<List<Contacto>> getByNombre(@PathVariable(value = "email") String email) {
         if (!contactoService.existsByEmail(email)) {
@@ -56,7 +60,8 @@ public class ContactoController {
         return new ResponseEntity<>(contacto, HttpStatus.OK);
     }
     
-    //@PreAuthorize("hasRole('ADMIN')")
+    @ApiOperation("Crea un nuevo contacto")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create")
     public ResponseEntity<?> create(@Valid @RequestBody ContactoDto contactoDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -65,24 +70,16 @@ public class ContactoController {
                 return new ResponseEntity(new Mensaje(error.getDefaultMessage()), HttpStatus.BAD_REQUEST);
             }
         }
-//        if (contactoService.existsByEmail(contactoDto.getEmail())) {
-//            return new ResponseEntity(new Mensaje("ese email ya existe"), HttpStatus.BAD_REQUEST);
-//        }
-//        if (StringUtils.isBlank(contactoDto.getLocalidad())) {
-//            return new ResponseEntity(new Mensaje("La localidad es obligatoria"), HttpStatus.BAD_REQUEST);
-//        }
-//        if (contactoDto.getTelefono() == null || contactoDto.getTelefono().length() < 10) {
-//            return new ResponseEntity(new Mensaje("Ingresa un número de teléfono válido"), HttpStatus.BAD_REQUEST);
-//        }
-//        if (StringUtils.isBlank(contactoDto.getEmail())) {
-//            return new ResponseEntity(new Mensaje("El email no es válido"), HttpStatus.BAD_REQUEST);
-//        }
+        if(contactoService.list() != null){
+            return new ResponseEntity(new Mensaje("Ya existe un contacto para este portfolio"), HttpStatus.BAD_REQUEST);
+        }
         Contacto contacto = new Contacto(contactoDto.getLocalidad(), contactoDto.getTelefono(), contactoDto.getEmail());
         contactoService.save(contacto);
         return new ResponseEntity(new Mensaje("Contacto creado con éxito"), HttpStatus.OK);
     }
     
-    //@PreAuthorize("hasRole('ADMIN')")
+    @ApiOperation("Actualiza un producto")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable("id") long id, @Valid @RequestBody ContactoDto contactoDto, BindingResult bindingResult) {
         if (!contactoService.existsById(id)) {
@@ -94,15 +91,6 @@ public class ContactoController {
                 return new ResponseEntity(new Mensaje(error.getDefaultMessage()), HttpStatus.BAD_REQUEST);
             }
         }
-//        if (StringUtils.isBlank(contactoDto.getLocalidad())) {
-//            return new ResponseEntity(new Mensaje("La localidad es obligatorio"), HttpStatus.BAD_REQUEST);
-//        }
-//        if (contactoDto.getTelefono() == null || contactoDto.getTelefono().length() < 10) {
-//            return new ResponseEntity(new Mensaje("Ingresa un número de teléfono válido"), HttpStatus.BAD_REQUEST);
-//        }
-//        if (StringUtils.isBlank(contactoDto.getEmail())) {
-//            return new ResponseEntity(new Mensaje("El email no es válido"), HttpStatus.BAD_REQUEST);
-//        }
 
         Contacto contacto = contactoService.getOne(id).get();
         contacto.setLocalidad(contactoDto.getLocalidad());
@@ -112,7 +100,8 @@ public class ContactoController {
         return new ResponseEntity(new Mensaje("Contacto actualizado con éxito"), HttpStatus.OK);
     }
 
-    //@PreAuthorize("hasRole('ADMIN')")
+    @ApiOperation("Elimina un contacto por id")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") long id) {
         if (!contactoService.existsById(id)) {

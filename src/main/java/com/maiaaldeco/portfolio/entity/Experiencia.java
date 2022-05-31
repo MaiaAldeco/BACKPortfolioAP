@@ -34,8 +34,8 @@ public class Experiencia {
     @NotNull
     @Column(name = "puesto")
     private String puesto;
-    @Column(name = "tasks")
-    private String tareas;
+    @Column(name = "tasks", length = 4000)
+    private String descripcion;
     @NotNull
     @Column(name = "start_date")
     private java.sql.Date fechaInicio;
@@ -50,7 +50,7 @@ public class Experiencia {
     public Experiencia(String nombre, String puesto, String tareas, Date fechaInicio, Date fechaFin) {
         this.nombre = nombre;
         this.puesto = puesto;
-        this.tareas = tareas;
+        this.descripcion = tareas;
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
     }
@@ -58,7 +58,7 @@ public class Experiencia {
     public Experiencia(String nombre, String puesto, String tareas, Date fechaInicio, Date fechaFin, Persona persona) {
         this.nombre = nombre;
         this.puesto = puesto;
-        this.tareas = tareas;
+        this.descripcion = tareas;
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
         this.persona = persona;

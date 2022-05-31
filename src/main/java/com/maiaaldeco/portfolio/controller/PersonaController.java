@@ -8,12 +8,13 @@ import com.maiaaldeco.portfolio.security.entity.Usuario;
 import com.maiaaldeco.portfolio.security.service.UsuarioService;
 import com.maiaaldeco.portfolio.service.IContactoService;
 import com.maiaaldeco.portfolio.service.IPersonaService;
+import io.swagger.annotations.ApiOperation;
 import java.util.List;
-import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.CurrentSecurityContext;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -41,12 +42,14 @@ public class PersonaController {
     @Autowired
     UsuarioService usuarioService;
 
+    @ApiOperation("Muestra una lista de personas")
     @GetMapping("/lista")
     public ResponseEntity<List<Persona>> list() {
         List<Persona> list = personaService.list();
         return new ResponseEntity<List<Persona>>(list, HttpStatus.OK);
     }
 
+    @ApiOperation("Muestra una persona por id")
     @GetMapping("/detail/{id}")
     public ResponseEntity<Persona> getById(@PathVariable("id") long id) {
         if (!personaService.existsById(id)) {
@@ -57,8 +60,9 @@ public class PersonaController {
         }
     }
 
+    @ApiOperation("Muestra una persona por contacto id")
     @GetMapping("/contacto/{contactoId}")
-    public ResponseEntity<List<Persona>> getAllPersonasByEstudioId(@PathVariable(value = "contactoId") long contactoId) {
+    public ResponseEntity<List<Persona>> getPersonaByContactoId(@PathVariable(value = "contactoId") long contactoId) {
         if (!contactoService.existsById(contactoId)) {
             return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
         }
@@ -66,6 +70,7 @@ public class PersonaController {
         return new ResponseEntity<>(contactos, HttpStatus.OK);
     }
 
+    @ApiOperation("Muestra una persona por apellido")
     @GetMapping("/detailname/{apellido}")
     public ResponseEntity<List<Persona>> getByNombre(@PathVariable(value = "apellido") String apellido) {
         if (!personaService.existsByApellido(apellido)) {
@@ -75,46 +80,47 @@ public class PersonaController {
         return new ResponseEntity<>(persona, HttpStatus.OK);
     }
 
-    //NO RECOMENDADO
+    //CREA UNA PERSONA ASIGNANDO AUTOMATICAMNETE UN CONTACTO
+    @ApiOperation("Crea una persona")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create")
-    public ResponseEntity<?> create(@Valid @RequestBody PersonaDto persoDto, @CurrentSecurityContext(expression="authentication?.name")String username, BindingResult bindingResult) {
-        System.out.println("username " + username);
+    public ResponseEntity<?> create(@Valid @RequestBody PersonaDto persoDto, @CurrentSecurityContext(expression = "authentication?.name") String username, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             List<FieldError> errors = bindingResult.getFieldErrors();
             for (FieldError error : errors) {
                 return new ResponseEntity(new Mensaje(error.getDefaultMessage()), HttpStatus.BAD_REQUEST);
             }
         }
-        if (!contactoService.existsById(persoDto.getContacto().getId())) {
-            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.BAD_REQUEST);
+        if (personaService.list() != null) {
+            return new ResponseEntity(new Mensaje("Ya existe una persona para este portfolio"), HttpStatus.BAD_REQUEST);
+        }
+        if (contactoService.list().isEmpty()) {
+            return new ResponseEntity(new Mensaje("No existe un contacto para esta persona"), HttpStatus.BAD_REQUEST);
         }
 
-//        if (!usuarioService.existsById(persoDto.getUsuario().getId())) {
-//            return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.BAD_REQUEST);
-//        }
-        
         for (Persona lista : personaService.findByContactoId(persoDto.getContacto().getId())) {
             if (lista.getContacto().getId() == persoDto.getContacto().getId()) {
                 return new ResponseEntity(new Mensaje("El contacto no esta libre"), HttpStatus.BAD_REQUEST);
             }
         }
+        
         Usuario usuario = usuarioService.getByNombreUsuario(username).get();
-        System.out.println("USUARIO "+ usuario.getId() + " " + usuario.getNombre() + " " + usuario.getEmail());
-//        for (Persona lista : personaService.findByUsuarioId(persoDto.getUsuario().getId())) {
-//            if (lista.getUsuario().getId() == persoDto.getUsuario().getId()) {
-//                return new ResponseEntity(new Mensaje("El usuario no esta libre"), HttpStatus.BAD_REQUEST);
-//            }
-//        }
-        Persona persona = new Persona(persoDto.getNombre(), persoDto.getApellido(), persoDto.getStack(), persoDto.getTecnologia(), persoDto.getDescripcion(), usuario, persoDto.getContacto());
+        Contacto contacto = contactoService.list().stream().filter(e -> e != null).findFirst().orElse(null);
+        Persona persona = new Persona(persoDto.getNombre(), persoDto.getApellido(), persoDto.getStack(), persoDto.getTecnologia(), persoDto.getDescripcion(), usuario, contacto);
         System.out.println("PERSONA " + persona.toString());
         personaService.save(persona);
         return new ResponseEntity(new Mensaje("Persona creado con éxito"), HttpStatus.OK);
     }
 
+    @ApiOperation("Crea una persona por contacto id")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create/{contactoId}")
-    public ResponseEntity<?> create(@PathVariable(value = "contactoId") long contactoId, @Valid @RequestBody PersonaDto persoDto,@CurrentSecurityContext(expression="authentication?.name")String username, BindingResult bindingResult) {
+    public ResponseEntity<?> create(@PathVariable(value = "contactoId") long contactoId, @Valid @RequestBody PersonaDto persoDto, @CurrentSecurityContext(expression = "authentication?.name") String username, BindingResult bindingResult) {
         if (!contactoService.existsById(contactoId)) {
             return new ResponseEntity(new Mensaje("No existe el dato al que intenta acceder"), HttpStatus.NOT_FOUND);
+        }
+        if (personaService.list() != null) {
+            return new ResponseEntity(new Mensaje("Ya existe una persona para este portfolio"), HttpStatus.BAD_REQUEST);
         }
         if (bindingResult.hasErrors()) {
             List<FieldError> errors = bindingResult.getFieldErrors();
@@ -129,13 +135,15 @@ public class PersonaController {
         }
         Usuario usuario = usuarioService.getByNombreUsuario(username).get();
         Contacto contacto = contactoService.getOne(contactoId).get();
-        Persona persona = new Persona(persoDto.getNombre(), persoDto.getApellido(), persoDto.getStack(), persoDto.getStack(), persoDto.getTecnologia(),usuario, contacto);
+        Persona persona = new Persona(persoDto.getNombre(), persoDto.getApellido(), persoDto.getStack(), persoDto.getStack(), persoDto.getTecnologia(), usuario, contacto);
         personaService.save(persona);
         return new ResponseEntity(new Mensaje("Persona creado con éxito"), HttpStatus.CREATED);
     }
 
+    @ApiOperation("Actualiza una persona")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> update(@PathVariable("id") long id, @Valid @RequestBody PersonaDto persoDto, @CurrentSecurityContext(expression="authentication?.name")String username, BindingResult bindingResult) {
+    public ResponseEntity<?> update(@PathVariable("id") long id, @Valid @RequestBody PersonaDto persoDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             List<FieldError> errors = bindingResult.getFieldErrors();
             for (FieldError error : errors) {
@@ -145,16 +153,9 @@ public class PersonaController {
         if (!personaService.existsById(id)) {
             return new ResponseEntity(new Mensaje("No existe la persona a al que intenta acceder"), HttpStatus.NOT_FOUND);
         }
-        if (!contactoService.existsById(persoDto.getContacto().getId())) {
-            return new ResponseEntity(new Mensaje("No existe el contacto al que intenta acceder"), HttpStatus.NOT_FOUND);
-        }
-        if (!(personaService.getOne(id).get().getContacto().getId() == persoDto.getContacto().getId())) {
-            for (Persona lista : personaService.findByContactoId(persoDto.getContacto().getId())) {
-                if (lista.getContacto().getId() == persoDto.getContacto().getId()) {
-                    return new ResponseEntity(new Mensaje("El contacto no esta libre"), HttpStatus.BAD_REQUEST);
-                }
-            }
-        }
+
+        Contacto contacto = contactoService.list().stream().filter(e -> e != null).findFirst().orElse(null);
+        Usuario usuario = usuarioService.list().stream().filter(e -> e != null).findFirst().orElse(null);
 
         Persona persona = personaService.getOne(id).get();
         persona.setNombre(persoDto.getNombre());
@@ -162,13 +163,15 @@ public class PersonaController {
         persona.setStack(persoDto.getStack());
         persona.setTecnologia(persoDto.getTecnologia());
         persona.setDescripcion(persoDto.getDescripcion());
-        persona.setUsuario(usuarioService.getByNombreUsuario(username).get());
-        persona.setContacto(persoDto.getContacto());
+        persona.setUsuario(usuario);
+        persona.setContacto(contacto);
 
         personaService.save(persona);
         return new ResponseEntity(new Mensaje("Persona actualizado con éxito"), HttpStatus.OK);
     }
 
+    @ApiOperation("Elimina una persona")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") long id) {
         if (!personaService.existsById(id)) {
